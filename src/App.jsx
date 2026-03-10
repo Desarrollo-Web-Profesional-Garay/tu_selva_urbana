@@ -1,26 +1,39 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { GlobalContext } from './context/GlobalContext';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
 import Feed from './pages/Feed';
 import Quiz from './pages/Quiz';
 import Recommendations from './pages/Recommendations';
 import MyPlants from './pages/MyPlants';
 
+// Wrapper que protege rutas internas
+function ProtectedRoute({ children }) {
+    const { isAuthenticated } = useContext(GlobalContext);
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    return children;
+}
+
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Nueva Landing Page 3D Híbrida */}
+                {/* Landing Page pública */}
                 <Route path="/" element={<LandingPage />} />
 
-                {/* Rutas con el layout principal (Sidebar Desktop / Bottom Nav Mobile) */}
-                <Route element={<Layout />}>
+                {/* Login / Registro */}
+                <Route path="/login" element={<Login />} />
+
+                {/* Rutas protegidas con el layout principal */}
+                <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                     <Route path="/feed" element={<Feed />} />
                     <Route path="/recomendaciones" element={<Recommendations />} />
                     <Route path="/mis-plantas" element={<MyPlants />} />
                 </Route>
 
-                {/* Ruta clásica sin Nav (Flujo inmersivo por si se accede directo /quiz) */}
+                {/* Quiz inmersivo (accesible sin auth para el flujo de la Landing) */}
                 <Route path="/quiz" element={<Quiz />} />
 
                 {/* Fallback */}

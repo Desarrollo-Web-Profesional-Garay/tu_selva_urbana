@@ -2,7 +2,8 @@ import { useRef, useLayoutEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, LogIn, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import HeroScene from '../components/3d/HeroScene';
 import Quiz from './Quiz'; // We embed the Quiz directly into the landing page flow
@@ -11,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function LandingPage() {
     const containerRef = useRef();
+    const navigate = useNavigate();
     // Use state callback ref so GSAP reliably waits for the Canvas to mount the ThreeJS scene
     const [modelNode, setModelNode] = useState(null);
 
@@ -46,6 +48,39 @@ export default function LandingPage() {
     return (
         <div ref={containerRef} className="relative w-full overflow-x-hidden bg-bone">
 
+            {/* ===== TOP NAV BAR ===== */}
+            <motion.nav
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 lg:px-12 py-4"
+            >
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl">🌿</span>
+                    <span className="text-forest font-black text-lg tracking-tight">Tu Selva Urbana</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate('/login')}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-forest border-2 border-forest/20 hover:border-forest/50 bg-white/60 backdrop-blur-md transition-all"
+                    >
+                        <LogIn size={16} />
+                        Iniciar Sesión
+                    </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate('/login')}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-terra hover:bg-[#D36C52] shadow-lg shadow-terra/30 transition-all"
+                    >
+                        <UserPlus size={16} />
+                        Crear Cuenta
+                    </motion.button>
+                </div>
+            </motion.nav>
+
             {/* 
         Fixed Canvas Background. 
         It stays fixed while the page scrolls so GSAP can just update the model inside it.
@@ -62,7 +97,7 @@ export default function LandingPage() {
 
                 {/* -- SECTION 1: HERO (100vh) -- */}
                 <section className="h-screen w-full flex items-center justify-center pointer-events-none px-6">
-                    <div className="hero-content text-center max-w-4xl mx-auto -mt-32">
+                    <div className="hero-content text-center max-w-4xl mx-auto -mt-16">
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -79,6 +114,21 @@ export default function LandingPage() {
                         >
                             Arquitectura Biofílica Inteligente
                         </motion.p>
+
+                        {/* CTA Buttons */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 1.5 }}
+                            className="mt-10 flex items-center justify-center gap-4 pointer-events-auto"
+                        >
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="px-8 py-4 rounded-full font-bold text-white bg-terra hover:bg-[#D36C52] shadow-xl shadow-terra/30 transition-all text-lg"
+                            >
+                                Comenzar Gratis
+                            </button>
+                        </motion.div>
                     </div>
 
                     <motion.div

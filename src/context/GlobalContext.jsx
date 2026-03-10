@@ -4,46 +4,66 @@ import { plantDatabase, postsData, usersData } from '../data/mocks';
 export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
+    // Auth State
+    const [user, setUser] = useState(() => {
+        const saved = localStorage.getItem('tsu_user');
+        return saved ? JSON.parse(saved) : null;
+    });
+    const isAuthenticated = !!user;
+
+    useEffect(() => {
+        if (user) localStorage.setItem('tsu_user', JSON.stringify(user));
+        else localStorage.removeItem('tsu_user');
+    }, [user]);
+
+    const login = (email, password) => {
+        // Mock: cualquier credencial funciona
+        setUser({ name: email.split('@')[0], email, avatar: `https://i.pravatar.cc/150?u=${email}` });
+        return true;
+    };
+
+    const register = (name, email, password) => {
+        setUser({ name, email, avatar: `https://i.pravatar.cc/150?u=${email}` });
+        return true;
+    };
+
+    const logout = () => setUser(null);
+
     // Feed Status
     const [posts, setPosts] = useState(postsData);
 
     // User Profile
     const [myPlants, setMyPlants] = useState(() => {
-        // Para simplificar el prototipo, empezamos con una planta por defecto
         return [plantDatabase[1], plantDatabase[3]];
     });
 
     // Diagnóstico
     const [quizAnswers, setQuizAnswers] = useState(null);
-    const [recommendations, setRecommendations] = useState(plantDatabase.slice(0, 3)); // 3 Plantas default
+    const [recommendations, setRecommendations] = useState(plantDatabase.slice(0, 3));
 
     const handleDiagnostic = (answers) => {
         setQuizAnswers(answers);
         const { light, pets, time } = answers;
 
-        // Filtro simple (En un entorno real sería un engine algorítmico)
         let filtered = plantDatabase.filter(plant => {
             const matchLight = plant.light.includes(light);
             const matchPets = pets === 'Sí' ? plant.pets === 'Sí' : true;
-
             return matchLight && matchPets;
         });
 
         if (filtered.length === 0) {
-            // Fallback friendly
             filtered = [plantDatabase.find(p => p.id === 'sansevieria')];
         }
 
-        // Devolvemos máximo 3
         setRecommendations(filtered.slice(0, 3));
     };
 
     const adoptPlant = (plant) => {
         if (!myPlants.find(p => p.id === plant.id)) {
             setMyPlants([...myPlants, plant]);
-            return true; // Success
+            return true;
         }
-        return false; // Ya la tiene
+        return false;
     };
 
     const likePost = (postId) => {
@@ -53,16 +73,22 @@ export const GlobalProvider = ({ children }) => {
         }));
     };
 
-    // Helper para enriquecer posts con el usuario correcto
     const getEnrichedPosts = () => {
         return posts.map(post => {
-            const user = usersData.find(u => u.id === post.userId);
-            return { ...post, user };
+            const u = usersData.find(u => u.id === post.userId);
+            return { ...post, user: u };
         });
     };
 
     return (
         <GlobalContext.Provider value={{
+            // Auth
+            user,
+            isAuthenticated,
+            login,
+            register,
+            logout,
+            // Data
             posts: getEnrichedPosts(),
             myPlants,
             recommendations,
