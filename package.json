@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "start": "serve -s dist"
   },
   "dependencies": {
     "@google/model-viewer": "^4.0.0",
@@ -18,6 +19,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
+    "serve": "^14.2.6",
     "three": "^0.160.0"
   },
   "devDependencies": {
