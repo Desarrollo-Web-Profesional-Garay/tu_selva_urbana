@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --host",
-    "start": "vite preview --host"
+    "preview": "vite preview --host"
   },
   "dependencies": {
     "@google/model-viewer": "^4.0.0",
