@@ -1,104 +1,155 @@
-import { createContext, useState, useEffect } from 'react';
-import { plantDatabase, postsData, usersData } from '../data/mocks';
+import { createContext, useState, useEffect, useCallback } from 'react';
+import { authAPI, plantsAPI, postsAPI, usersAPI } from '../services/api';
 
 export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-    // Auth State
+    // ========== AUTH ==========
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem('tsu_user');
+        const token = localStorage.getItem('tsu_token');
+        // Si hay usuario guardado pero NO hay token (sesión vieja del mock), limpiar
+        if (saved && !token) {
+            localStorage.removeItem('tsu_user');
+            return null;
+        }
         return saved ? JSON.parse(saved) : null;
     });
     const isAuthenticated = !!user;
 
     useEffect(() => {
         if (user) localStorage.setItem('tsu_user', JSON.stringify(user));
-        else localStorage.removeItem('tsu_user');
+        else {
+            localStorage.removeItem('tsu_user');
+            localStorage.removeItem('tsu_token');
+        }
     }, [user]);
 
-    const login = (email, password) => {
-        // Mock: cualquier credencial funciona
-        setUser({ name: email.split('@')[0], email, avatar: `https://i.pravatar.cc/150?u=${email}` });
-        return true;
+    const login = async (email, password) => {
+        try {
+            const data = await authAPI.login(email, password);
+            localStorage.setItem('tsu_token', data.token);
+            setUser(data.user);
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: err.message };
+        }
     };
 
-    const register = (name, email, password) => {
-        setUser({ name, email, avatar: `https://i.pravatar.cc/150?u=${email}` });
-        return true;
+    const register = async (name, email, password) => {
+        try {
+            const data = await authAPI.register(name, email, password);
+            localStorage.setItem('tsu_token', data.token);
+            setUser(data.user);
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: err.message };
+        }
     };
 
     const logout = () => setUser(null);
 
-    // Feed Status
-    const [posts, setPosts] = useState(postsData);
+    // ========== PLANTS (catálogo) ==========
+    const [plantDatabase, setPlantDatabase] = useState([]);
 
-    // User Profile
-    const [myPlants, setMyPlants] = useState(() => {
-        return [plantDatabase[1], plantDatabase[3]];
-    });
+    const fetchPlants = useCallback(async () => {
+        try {
+            const data = await plantsAPI.getAll();
+            setPlantDatabase(data);
+        } catch (err) {
+            console.error('Error cargando plantas:', err);
+        }
+    }, []);
 
-    // Diagnóstico
+    useEffect(() => { fetchPlants(); }, [fetchPlants]);
+
+    // ========== QUIZ / RECOMENDACIONES ==========
     const [quizAnswers, setQuizAnswers] = useState(null);
-    const [recommendations, setRecommendations] = useState(plantDatabase.slice(0, 3));
+    const [recommendations, setRecommendations] = useState([]);
 
-    const handleDiagnostic = (answers) => {
+    const handleDiagnostic = async (answers) => {
         setQuizAnswers(answers);
-        const { light, pets, time } = answers;
-
-        let filtered = plantDatabase.filter(plant => {
-            const matchLight = plant.light.includes(light);
-            const matchPets = pets === 'Sí' ? plant.pets === 'Sí' : true;
-            return matchLight && matchPets;
-        });
-
-        if (filtered.length === 0) {
-            filtered = [plantDatabase.find(p => p.id === 'sansevieria')];
+        try {
+            const data = await plantsAPI.quiz(answers);
+            setRecommendations(data);
+        } catch (err) {
+            console.error('Error en quiz:', err);
+            // Fallback local
+            setRecommendations(plantDatabase.slice(0, 3));
         }
-
-        setRecommendations(filtered.slice(0, 3));
     };
 
-    const adoptPlant = (plant) => {
-        if (!myPlants.find(p => p.id === plant.id)) {
-            setMyPlants([...myPlants, plant]);
+    // ========== MIS PLANTAS ==========
+    const [myPlants, setMyPlants] = useState([]);
+
+    const fetchMyPlants = useCallback(async () => {
+        if (!isAuthenticated) return;
+        try {
+            const data = await usersAPI.getMyPlants();
+            setMyPlants(data);
+        } catch (err) {
+            console.error('Error cargando mis plantas:', err);
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => { fetchMyPlants(); }, [fetchMyPlants]);
+
+    const adoptPlant = async (plant) => {
+        try {
+            await usersAPI.adoptPlant(plant.id);
+            await fetchMyPlants(); // Refrescar lista
             return true;
+        } catch (err) {
+            console.error('Error adoptando:', err);
+            return false;
         }
-        return false;
     };
 
-    const likePost = (postId) => {
-        setPosts(posts.map(p => {
-            if (p.id === postId) return { ...p, likes: p.likes + 1 };
-            return p;
-        }));
+    // ========== POSTS (Feed) ==========
+    const [posts, setPosts] = useState([]);
+
+    const fetchPosts = useCallback(async () => {
+        if (!isAuthenticated) return;
+        try {
+            const data = await postsAPI.getAll();
+            setPosts(data);
+        } catch (err) {
+            console.error('Error cargando posts:', err);
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+    const likePost = async (postId) => {
+        try {
+            const { likes } = await postsAPI.like(postId);
+            setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes } : p));
+        } catch (err) {
+            console.error('Error dando like:', err);
+        }
     };
 
-    const getEnrichedPosts = () => {
-        return posts.map(post => {
-            const u = usersData.find(u => u.id === post.userId);
-            return { ...post, user: u };
-        });
+    const updateProfile = async (data) => {
+        try {
+            const updatedUser = await usersAPI.updateMe(data);
+            setUser(updatedUser);
+            return { success: true };
+        } catch (err) {
+            console.error('Error actualizando perfil:', err);
+            return { success: false, error: err.message };
+        }
     };
 
     return (
         <GlobalContext.Provider value={{
-            // Auth
-            user,
-            isAuthenticated,
-            login,
-            register,
-            logout,
-            // Data
-            posts: getEnrichedPosts(),
-            myPlants,
-            recommendations,
-            quizAnswers,
+            user, isAuthenticated, login, register, logout, updateProfile,
+            posts, likePost, fetchPosts,
+            myPlants, adoptPlant,
+            recommendations, quizAnswers, handleDiagnostic,
             plantDatabase,
-            handleDiagnostic,
-            adoptPlant,
-            likePost
         }}>
             {children}
         </GlobalContext.Provider>
     );
 };
+

@@ -12,20 +12,40 @@ export default function Login() {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
     const [loading, setLoading] = useState(false);
 
+    const [error, setError] = useState('');
+    const [registerSuccess, setRegisterSuccess] = useState(false);
+
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setTimeout(() => {
-            if (isRegister) {
-                register(form.name, form.email, form.password);
-            } else {
-                login(form.email, form.password);
-            }
+        setError('');
+        setRegisterSuccess(false);
+
+        if (isRegister) {
+            const result = await register(form.name, form.email, form.password);
             setLoading(false);
-            navigate('/feed');
-        }, 1200);
+            if (result.success) {
+                // No auto-login: mostrar mensaje de éxito y cambiar a pestaña login
+                setRegisterSuccess(true);
+                setForm({ name: '', email: form.email, password: '' });
+                setTimeout(() => {
+                    setIsRegister(false);
+                    setRegisterSuccess(false);
+                }, 3000);
+            } else {
+                setError(result.error || 'Error al crear cuenta');
+            }
+        } else {
+            const result = await login(form.email, form.password);
+            setLoading(false);
+            if (result.success) {
+                navigate('/feed');
+            } else {
+                setError(result.error || 'Credenciales inválidas');
+            }
+        }
     };
 
     return (
@@ -113,6 +133,30 @@ export default function Login() {
 
                         {/* FORM */}
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Success Alert */}
+                            <AnimatePresence>
+                                {registerSuccess && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0 }}
+                                        className="bg-green-500/20 border border-green-400/30 text-green-200 text-sm font-medium px-4 py-3 rounded-2xl text-center"
+                                    >
+                                        ✅ ¡Cuenta creada con éxito! Ahora inicia sesión.
+                                    </motion.div>
+                                )}
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0 }}
+                                        className="bg-red-500/20 border border-red-400/30 text-red-200 text-sm font-medium px-4 py-3 rounded-2xl text-center"
+                                    >
+                                        ❌ {error}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
                             <AnimatePresence mode="wait">
                                 {isRegister && (
                                     <motion.div
@@ -217,7 +261,7 @@ export default function Login() {
                         ← Volver al inicio
                     </motion.button>
                 </motion.div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

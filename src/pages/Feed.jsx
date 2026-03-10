@@ -52,9 +52,9 @@ export default function Feed() {
 
                             {/* Header superpuesto en la imagen */}
                             <div className="absolute top-0 left-0 right-0 p-6 flex items-center gap-4">
-                                <img src={post.user?.avatar} alt={post.user?.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md bg-bone" />
+                                <img src={post.author?.avatar} alt={post.author?.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md bg-bone" />
                                 <div className="text-white drop-shadow-md">
-                                    <h3 className="font-bold text-base">{post.user?.name}</h3>
+                                    <h3 className="font-bold text-base">{post.author?.name}</h3>
                                     <p className="text-xs font-medium text-white/80">Hace 2 horas</p>
                                 </div>
                             </div>
@@ -75,19 +75,19 @@ export default function Feed() {
                                     </motion.button>
                                     <button className="flex items-center gap-2 text-forest/60 hover:text-sage transition-colors cursor-pointer">
                                         <MessageCircle size={26} />
-                                        <span className="font-bold text-lg">{post.comments}</span>
+
                                     </button>
                                 </div>
 
                                 {/* Text content */}
                                 <p className="text-[16px] text-forest/80 leading-relaxed overflow-hidden">
-                                    <span className="font-bold text-forest mr-2">{post.user?.name}</span>
+                                    <span className="font-bold text-forest mr-2">{post.author?.name}</span>
                                     {post.content}
                                 </p>
                             </div>
 
                             {/* CTA Ad Botánico (Siempre al fondo) */}
-                            {post.taggedPlantId && (
+                            {post.plantId && (
                                 <div className="mt-8 bg-gradient-to-r from-bone to-sage/10 rounded-2xl p-4 flex items-center justify-between border border-sage/30 group-hover:border-sage/60 transition-colors">
                                     <div className="flex items-center gap-3 text-sm font-bold text-forest">
                                         <span className="text-2xl drop-shadow-sm">🪴</span>

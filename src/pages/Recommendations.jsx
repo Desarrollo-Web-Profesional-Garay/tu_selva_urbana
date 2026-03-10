@@ -1,20 +1,18 @@
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Star, Info } from 'lucide-react';
+import CheckoutModal from '../components/CheckoutModal';
+import PlantDetailsModal from '../components/PlantDetailsModal';
 
 export default function Recommendations() {
     const { recommendations, adoptPlant } = useContext(GlobalContext);
     const [addingIndex, setAddingIndex] = useState(null);
+    const [selectedPlant, setSelectedPlant] = useState(null); // Para Checkout
+    const [infoPlant, setInfoPlant] = useState(null); // Para Detalles
 
     const handleAdopt = (plant, index) => {
-        setAddingIndex(index);
-        adoptPlant(plant);
-
-        // Simulate network request + success animation delay
-        setTimeout(() => {
-            setAddingIndex(null);
-        }, 1500);
+        setSelectedPlant(plant);
     };
 
     return (
@@ -44,20 +42,27 @@ export default function Recommendations() {
 
                         {/* Model Viewer Container */}
                         <div className="w-full aspect-square bg-gradient-to-br from-bone to-sage/10 relative flex justify-center items-center overflow-hidden cursor-grab active:cursor-grabbing">
-                            {/* @google/model-viewer */}
-                            <model-viewer
-                                src={plant.modelUrl}
-                                alt={`Modelo 3D de ${plant.name}`}
-                                auto-rotate
-                                camera-controls
-                                shadow-intensity="1.5"
-                                interaction-prompt="none"
-                                style={{ width: '130%', height: '130%', outline: 'none' }}
-                            />
+                            {/* @google/model-viewer o Imagen 2D */}
+                            {plant.modelUrl ? (
+                                <model-viewer
+                                    src={plant.modelUrl}
+                                    alt={`Modelo 3D de ${plant.name}`}
+                                    auto-rotate
+                                    camera-controls
+                                    shadow-intensity="1.5"
+                                    interaction-prompt="none"
+                                    style={{ width: '130%', height: '130%', outline: 'none' }}
+                                />
+                            ) : (
+                                <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+                            )}
 
-                            <div className="absolute bottom-5 right-5 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg text-forest/50 group-hover:text-forest transition-colors">
+                            <button
+                                onClick={() => setInfoPlant(plant)}
+                                className="absolute bottom-5 right-5 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg text-forest/50 hover:text-forest hover:bg-white transition-all hover:scale-110 z-10"
+                            >
                                 <Info size={20} />
-                            </div>
+                            </button>
                         </div>
 
                         {/* Details */}
@@ -76,8 +81,8 @@ export default function Recommendations() {
                                 disabled={addingIndex === idx}
                                 onClick={() => handleAdopt(plant, idx)}
                                 className={`w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-3 transition-all duration-300 ${addingIndex === idx
-                                        ? 'bg-sage shadow-inner text-white cursor-wait'
-                                        : 'bg-forest hover:bg-forest-hover shadow-xl shadow-forest/20 cursor-pointer'
+                                    ? 'bg-sage shadow-inner text-white cursor-wait'
+                                    : 'bg-forest hover:bg-forest-hover shadow-xl shadow-forest/20 cursor-pointer'
                                     }`}
                             >
                                 {addingIndex === idx ? (
@@ -99,6 +104,18 @@ export default function Recommendations() {
                     </motion.div>
                 ))}
             </div>
+
+            <CheckoutModal
+                isOpen={!!selectedPlant}
+                onClose={() => setSelectedPlant(null)}
+                plant={selectedPlant}
+            />
+
+            <PlantDetailsModal
+                isOpen={!!infoPlant}
+                onClose={() => setInfoPlant(null)}
+                plant={infoPlant}
+            />
         </div>
     );
 }

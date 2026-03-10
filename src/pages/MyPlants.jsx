@@ -2,7 +2,11 @@ import { useContext, useState } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Droplet, Sun, Wind, X, Bell, Star } from 'lucide-react';
-import { notificationsData } from '../data/mocks';
+// Notificaciones de ejemplo (en el futuro vendrán del backend)
+const notificationsData = [
+    { id: 'n1', message: '💧 ¡Tu planta tiene sed hoy!', type: 'water' },
+    { id: 'n2', message: '🌬️ Tu planta necesita mayor humedad.', type: 'humidity' },
+];
 
 export default function MyPlants() {
     const { myPlants } = useContext(GlobalContext);
@@ -51,13 +55,17 @@ export default function MyPlants() {
                         className="bg-white/80 backdrop-blur-md rounded-[32px] p-6 flex flex-col items-center text-center shadow-sm border border-sage/20 hover:shadow-xl hover:shadow-sage/30 transition-all duration-300 group cursor-pointer"
                     >
                         <div className="w-full aspect-square mb-5 rounded-full bg-gradient-to-t from-bone to-sage/10 flex items-center justify-center overflow-hidden border border-sage/30 group-hover:border-sage/60 transition-colors pointer-events-none">
-                            <model-viewer
-                                src={plant.modelUrl}
-                                auto-rotate
-                                camera-controls={false}
-                                interaction-prompt="none"
-                                style={{ width: '130%', height: '130%' }}
-                            />
+                            {plant.modelUrl ? (
+                                <model-viewer
+                                    src={plant.modelUrl}
+                                    auto-rotate
+                                    camera-controls={false}
+                                    interaction-prompt="none"
+                                    style={{ width: '130%', height: '130%' }}
+                                />
+                            ) : (
+                                <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+                            )}
                         </div>
                         <h3 className="font-bold text-forest text-lg leading-tight mb-3 xl:text-xl">{plant.name}</h3>
                         <span className="text-xs xl:text-sm text-sage font-bold px-4 py-2 bg-sage/10 rounded-full group-hover:bg-sage/20 transition-colors w-full">
@@ -96,8 +104,12 @@ export default function MyPlants() {
                             </button>
 
                             <div className="flex flex-col items-center text-center mb-10 pt-10">
-                                <div className="w-56 h-56 bg-gradient-to-br from-bone to-sage/40 rounded-[40px] flex items-center justify-center object-cover mb-8 pointer-events-none">
-                                    <model-viewer src={selectedPlant.modelUrl} style={{ width: '150%', height: '150%' }} />
+                                <div className="w-56 h-56 rounded-full bg-gradient-to-br from-bone to-sage/40 flex items-center justify-center overflow-hidden mb-8 shadow-inner border border-sage/20 pointer-events-none">
+                                    {selectedPlant.modelUrl ? (
+                                        <model-viewer src={selectedPlant.modelUrl} style={{ width: '150%', height: '150%' }} />
+                                    ) : (
+                                        <img src={selectedPlant.imageUrl} alt={selectedPlant.name} className="w-full h-full object-cover" />
+                                    )}
                                 </div>
                                 <h2 className="text-4xl font-extrabold text-forest mb-2">{selectedPlant.name}</h2>
                                 <div className="inline-flex items-center gap-2 bg-sage/20 px-4 py-2 rounded-full mt-2">
@@ -111,7 +123,7 @@ export default function MyPlants() {
                                     <div className="bg-white p-3 rounded-2xl shadow-sm text-blue-500 mt-1"><Droplet size={28} /></div>
                                     <div>
                                         <h4 className="font-bold text-forest text-lg mb-2">Protocolo de Riego</h4>
-                                        <p className="text-forest/80 text-[15px] leading-relaxed">{selectedPlant.careGuide.water}</p>
+                                        <p className="text-forest/80 text-[15px] leading-relaxed">{selectedPlant.careWater || 'Sin información'}</p>
                                     </div>
                                 </div>
 
@@ -119,7 +131,7 @@ export default function MyPlants() {
                                     <div className="bg-white p-3 rounded-2xl shadow-sm text-amber-500 mt-1"><Sun size={28} /></div>
                                     <div>
                                         <h4 className="font-bold text-forest text-lg mb-2">Exposición Lumínica</h4>
-                                        <p className="text-forest/80 text-[15px] leading-relaxed">{selectedPlant.careGuide.light}</p>
+                                        <p className="text-forest/80 text-[15px] leading-relaxed">{selectedPlant.careLight || 'Sin información'}</p>
                                     </div>
                                 </div>
 
@@ -127,7 +139,7 @@ export default function MyPlants() {
                                     <div className="bg-white p-3 rounded-2xl shadow-sm text-sage mt-1"><Wind size={28} /></div>
                                     <div>
                                         <h4 className="font-bold text-forest text-lg mb-2">Microclima</h4>
-                                        <p className="text-forest/80 text-[15px] leading-relaxed">{selectedPlant.careGuide.humidity}</p>
+                                        <p className="text-forest/80 text-[15px] leading-relaxed">{selectedPlant.careHumidity || 'Sin información'}</p>
                                     </div>
                                 </div>
                             </div>

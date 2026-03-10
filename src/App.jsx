@@ -8,6 +8,8 @@ import Feed from './pages/Feed';
 import Quiz from './pages/Quiz';
 import Recommendations from './pages/Recommendations';
 import MyPlants from './pages/MyPlants';
+import MyAccount from './pages/MyAccount';
+import Catalog from './pages/Catalog';
 
 // Wrapper que protege rutas internas
 function ProtectedRoute({ children }) {
@@ -30,7 +32,9 @@ function App() {
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                     <Route path="/feed" element={<Feed />} />
                     <Route path="/recomendaciones" element={<Recommendations />} />
+                    <Route path="/catalogo" element={<Catalog />} />
                     <Route path="/mis-plantas" element={<MyPlants />} />
+                    <Route path="/mi-cuenta" element={<MyAccount />} />
                 </Route>
 
                 {/* Quiz inmersivo (accesible sin auth para el flujo de la Landing) */}
