@@ -38,7 +38,7 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-app.listen(PORT, () => {
-    console.log(`🌿 Tu Selva Urbana API corriendo en http://localhost:${PORT}`);
-    console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🌿 Tu Selva Urbana API corriendo en el puerto ${PORT}`);
+    console.log(`📋 Health check disponible (Bound to 0.0.0.0)`);
 });
