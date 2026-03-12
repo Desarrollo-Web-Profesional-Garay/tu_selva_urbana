@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  password  String
+  avatar    String?
+  createdAt DateTime    @default(now())
+  posts     Post[]
+  orders    Order[]
+  plants    UserPlant[]
+}
+
+model Plant {
+  id        Int         @id @default(autoincrement())
+  slug      String      @unique
+  name      String
+  modelUrl  String?
+  imageUrl  String?
+  light     String[]    // ["Poca", "Media", "Sol"]
+  petSafe   Boolean     @default(false)
+  careLevel String      @default("normal") // "facil", "normal", "experto"
+  tag       String?
+  price     Float       @default(0)
+  careWater    String?
+  careLight    String?
+  careHumidity String?
+  createdAt DateTime    @default(now())
+  users     UserPlant[]
+  posts     Post[]
+  orderItems OrderItem[]
+}
+
+model UserPlant {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  plant     Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  plantId   Int
+  adoptedAt DateTime @default(now())
+
+  @@unique([userId, plantId])
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  content   String
+  image     String?
+  likes     Int      @default(0)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  plant     Plant?   @relation(fields: [plantId], references: [id])
+  plantId   Int?
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  total     Float
+  status    String      @default("pendiente") // pendiente, pagado, enviado, entregado
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id       Int   @id @default(autoincrement())
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId  Int
+  plant    Plant @relation(fields: [plantId], references: [id])
+  plantId  Int
+  quantity Int   @default(1)
+  price    Float
+}
