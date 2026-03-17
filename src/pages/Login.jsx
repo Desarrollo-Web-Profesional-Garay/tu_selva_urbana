@@ -57,7 +57,7 @@ export default function Login() {
                 loop
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover scale-105"
-                src="/Video_realista_de_flores_con_viento.mp4"
+                src="/video_SeedVR2_00003_.mp4"
             />
 
             {/* ===== OVERLAY OSCURO ===== */}
