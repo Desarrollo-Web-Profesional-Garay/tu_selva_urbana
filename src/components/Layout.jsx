@@ -131,18 +131,18 @@ export default function Layout() {
                                 key={item.to}
                                 to={item.to}
                                 className={({ isActive }) =>
-                                    `flex flex-col items-center justify-center w-20 h-full transition-colors relative ${isActive ? 'text-forest' : 'text-gray-400 hover:text-sage'
+                                    `flex flex-col items-center justify-center w-14 sm:w-20 h-full transition-colors relative ${isActive ? 'text-forest' : 'text-gray-400 hover:text-sage'
                                     }`
                                 }
                             >
                                 {({ isActive }) => (
                                     <>
-                                        <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
-                                        <span className="text-[11px] font-bold mt-1.5">{item.label}</span>
+                                        <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                                        <span className="text-[10px] sm:text-[11px] font-bold mt-1.5 truncate w-full text-center">{item.label}</span>
                                         {isActive && (
                                             <motion.div
                                                 layoutId="bottom-nav-mobile"
-                                                className="absolute top-0 w-12 h-1.5 bg-sage rounded-b-full"
+                                                className="absolute top-0 w-10 h-1.5 bg-sage rounded-b-full"
                                             />
                                         )}
                                     </>
@@ -150,6 +150,25 @@ export default function Layout() {
                             </NavLink>
                         );
                     })}
+                    <NavLink
+                        to="/mi-cuenta"
+                        className={({ isActive }) =>
+                            `flex flex-col items-center justify-center w-14 sm:w-20 h-full transition-colors relative ${isActive ? 'text-forest' : 'text-gray-400 hover:text-sage'}`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'U'}&background=ECECE5&color=2C3E2D`} className={`w-6 h-6 rounded-full mb-1 object-cover border-[1.5px] ${isActive ? 'border-terra' : 'border-transparent'}`} alt="Perfil" />
+                                <span className="text-[10px] sm:text-[11px] font-bold mt-1.5">Perfil</span>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="bottom-nav-mobile"
+                                        className="absolute top-0 w-10 h-1.5 bg-sage rounded-b-full"
+                                    />
+                                )}
+                            </>
+                        )}
+                    </NavLink>
                 </div>
             </nav>
 
