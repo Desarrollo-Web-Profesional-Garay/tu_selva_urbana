@@ -6,6 +6,7 @@ import { GlobalContext } from '../context/GlobalContext';
 import CreatePostModal from './CreatePostModal';
 import ScannerModal from './ScannerModal';
 import { ScanLine } from 'lucide-react';
+import Chatbot from './Chatbot';
 
 export default function Layout() {
     const navItems = [
@@ -21,7 +22,7 @@ export default function Layout() {
     const [isScannerOpen, setIsScannerOpen] = useState(false);
 
     return (
-        <div className="flex h-screen w-screen bg-bone overflow-hidden">
+        <div className="flex h-screen w-screen bg-bone bg-organic-pattern bg-[length:600px_600px] overflow-hidden">
             {/* Sidebar Desktop (Premium Web Design) */}
             <aside className="hidden lg:flex flex-col w-80 bg-white/80 backdrop-blur-xl border-r border-sage/20 shadow-xl z-20 flex-shrink-0">
                 <div className="p-10 flex items-center gap-4">
@@ -163,6 +164,7 @@ export default function Layout() {
 
             <CreatePostModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
             <ScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
+            <Chatbot />
         </div>
     );
 }

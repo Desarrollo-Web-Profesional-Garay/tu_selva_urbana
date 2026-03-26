@@ -49,6 +49,8 @@ export const postsAPI = {
         request('/posts', { method: 'POST', body: JSON.stringify(data) }),
     like: (id) =>
         request(`/posts/${id}/like`, { method: 'POST' }),
+    getComments: (id) => request(`/posts/${id}/comments`),
+    addComment: (id, text) => request(`/posts/${id}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
 };
 
 // ========== ORDERS ==========
@@ -66,4 +68,10 @@ export const usersAPI = {
     getMyPlants: () => request('/users/me/plants'),
     adoptPlant: (plantId) =>
         request('/users/me/plants', { method: 'POST', body: JSON.stringify({ plantId }) }),
+};
+
+// ========== CHATBOT ==========
+export const chatAPI = {
+    sendMessage: (message, context) =>
+        request('/chat', { method: 'POST', body: JSON.stringify({ message, context }) })
 };

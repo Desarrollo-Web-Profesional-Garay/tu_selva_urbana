@@ -1,15 +1,18 @@
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, Heart, MessageCircle, Settings, Camera } from 'lucide-react';
+import { Edit2, Heart, MessageCircle, Settings, Camera, PlusCircle, Sparkles } from 'lucide-react';
 import EditProfileModal from '../components/EditProfileModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function MyAccount() {
     const { user, posts, myPlants } = useContext(GlobalContext);
     const [activeTab, setActiveTab] = useState('posts');
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+    const navigate = useNavigate();
 
     const userPosts = posts.filter(p => p.author?.id === user?.id);
+    const likedPosts = posts.filter(p => p.likedBy?.some(u => u.id === user?.id));
 
     return (
         <div className="pb-12 h-full flex flex-col relative w-full">
@@ -62,6 +65,12 @@ export default function MyAccount() {
                 >
                     Mis Plantas
                 </button>
+                <button
+                    onClick={() => setActiveTab('likes')}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'likes' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
+                >
+                    Favoritos
+                </button>
             </div>
 
             {/* Content Area */}
@@ -94,7 +103,7 @@ export default function MyAccount() {
                                         <p className="text-forest/80 leading-relaxed text-[15px] mb-4 line-clamp-2">{post.content}</p>
                                         <div className="flex items-center gap-4 text-forest/50">
                                             <div className="flex items-center gap-1.5"><Heart size={18} /> <span className="text-sm font-bold">{post.likes}</span></div>
-                                            <div className="flex items-center gap-1.5"><MessageCircle size={18} /> <span className="text-sm font-bold">{post.comments || 0}</span></div>
+                                            <div className="flex items-center gap-1.5"><MessageCircle size={18} /> <span className="text-sm font-bold">{post.comments?.length || 0}</span></div>
                                         </div>
                                     </div>
                                     <button className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-2 rounded-full text-forest/50 hover:text-terra opacity-0 group-hover:opacity-100 transition-all shadow-sm">
@@ -102,12 +111,65 @@ export default function MyAccount() {
                                     </button>
                                 </article>
                             )) : (
-                                <div className="col-span-full py-20 text-center">
-                                    <div className="w-20 h-20 bg-bone rounded-full flex items-center justify-center mx-auto mb-4 text-forest/30">
+                                <div className="col-span-full py-20 text-center flex flex-col items-center">
+                                    <div className="w-20 h-20 bg-bone rounded-full flex items-center justify-center mx-auto mb-4 text-forest/30 shadow-inner">
                                         <Camera size={40} />
                                     </div>
                                     <h3 className="text-xl font-bold text-forest mb-2">Aún no tienes publicaciones</h3>
-                                    <p className="text-forest/60 max-w-md mx-auto">Comparte el progreso de tus plantas con la comunidad biofílica.</p>
+                                    <p className="text-forest/60 max-w-md mx-auto mb-8">Comparte el progreso de tus plantas con la comunidad biofílica. Muestra al mundo cómo crecen.</p>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }} 
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => navigate('/feed')}
+                                        className="bg-forest text-white px-6 py-3 rounded-full font-bold shadow-md shadow-forest/20 flex items-center gap-2"
+                                    >
+                                        <PlusCircle size={18} /> Explorar el Feed
+                                    </motion.button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'likes' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                            {likedPosts.length > 0 ? likedPosts.map((post) => (
+                                <article key={post.id} className="bg-white/90 backdrop-blur-md rounded-[32px] overflow-hidden shadow-sm border border-sage/10 relative group">
+                                    <div className="aspect-square w-full bg-bone relative overflow-hidden">
+                                        {post.image ? (
+                                            <img src={post.image} alt="Publicación" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-bone to-sage/20 text-forest/40">
+                                                <span className="text-4xl mb-2">🌿</span>
+                                                <p className="font-medium text-sm">Post de texto</p>
+                                            </div>
+                                        )}
+                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-forest flex items-center gap-1 shadow-sm">
+                                            {new Date(post.createdAt).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div className="p-6">
+                                        <p className="text-forest/80 leading-relaxed text-[15px] mb-4 line-clamp-2">{post.content}</p>
+                                        <div className="flex items-center gap-4 text-forest/50">
+                                            <div className="flex items-center gap-1.5"><Heart size={18} className="text-terra fill-terra" /> <span className="text-sm font-bold">{post.likes}</span></div>
+                                            <div className="flex items-center gap-1.5"><MessageCircle size={18} /> <span className="text-sm font-bold">{post.comments?.length || 0}</span></div>
+                                        </div>
+                                    </div>
+                                </article>
+                            )) : (
+                                <div className="col-span-full py-20 text-center flex flex-col items-center">
+                                    <div className="w-20 h-20 bg-bone rounded-full flex items-center justify-center mx-auto mb-4 text-forest/30 shadow-inner">
+                                        <Heart size={40} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-forest mb-2">Aún no tienes favoritos</h3>
+                                    <p className="text-forest/60 max-w-md mx-auto mb-8">Navega por el feed y guarda aquí las publicaciones que te inspiran.</p>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }} 
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => navigate('/feed')}
+                                        className="bg-forest text-white px-6 py-3 rounded-full font-bold shadow-md shadow-forest/20 flex items-center gap-2"
+                                    >
+                                        <PlusCircle size={18} /> Ir al Feed
+                                    </motion.button>
                                 </div>
                             )}
                         </div>
@@ -127,10 +189,19 @@ export default function MyAccount() {
                                     <h3 className="font-bold text-forest text-lg leading-tight">{plant.name}</h3>
                                 </div>
                             )) : (
-                                <div className="col-span-full py-20 text-center">
-                                    <span className="text-5xl block mb-4">🌱</span>
-                                    <h3 className="text-xl font-bold text-forest mb-2">Tu selva está vacía</h3>
-                                    <p className="text-forest/60">Realiza un diagnóstico para encontrar tus primeras compañeras.</p>
+                                <div className="col-span-full py-20 text-center flex flex-col items-center">
+                                    <span className="text-6xl block mb-6 drop-shadow-sm">🌱</span>
+                                    <h3 className="text-xl font-extrabold text-forest mb-2">Tu selva está vacía</h3>
+                                    <p className="text-forest/60 max-w-sm mb-8">No te preocupes. Todo empieza con una sola hoja. Descubre las compañeras perfectas para tu hogar.</p>
+                                    
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }} 
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => navigate('/quiz')}
+                                        className="bg-terra text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-terra/20 flex items-center gap-2"
+                                    >
+                                        <Sparkles size={18} /> Realizar Diagnóstico
+                                    </motion.button>
                                 </div>
                             )}
                         </div>

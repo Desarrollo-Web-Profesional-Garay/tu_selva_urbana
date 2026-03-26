@@ -64,18 +64,28 @@ export const GlobalProvider = ({ children }) => {
     useEffect(() => { fetchPlants(); }, [fetchPlants]);
 
     // ========== QUIZ / RECOMENDACIONES ==========
-    const [quizAnswers, setQuizAnswers] = useState(null);
-    const [recommendations, setRecommendations] = useState([]);
+    const [quizAnswers, setQuizAnswers] = useState(() => {
+        const saved = localStorage.getItem('tsu_quiz_answers');
+        return saved ? JSON.parse(saved) : null;
+    });
+    const [recommendations, setRecommendations] = useState(() => {
+        const saved = localStorage.getItem('tsu_recommendations');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     const handleDiagnostic = async (answers) => {
         setQuizAnswers(answers);
         try {
             const data = await plantsAPI.quiz(answers);
             setRecommendations(data);
+            localStorage.setItem('tsu_quiz_answers', JSON.stringify(answers));
+            localStorage.setItem('tsu_recommendations', JSON.stringify(data));
         } catch (err) {
             console.error('Error en quiz:', err);
-            // Fallback local
-            setRecommendations(plantDatabase.slice(0, 3));
+            const fallback = plantDatabase.slice(0, 3);
+            setRecommendations(fallback);
+            localStorage.setItem('tsu_quiz_answers', JSON.stringify(answers));
+            localStorage.setItem('tsu_recommendations', JSON.stringify(fallback));
         }
     };
 
@@ -122,8 +132,8 @@ export const GlobalProvider = ({ children }) => {
 
     const likePost = async (postId) => {
         try {
-            const { likes } = await postsAPI.like(postId);
-            setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes } : p));
+            const { likes, likedBy } = await postsAPI.like(postId);
+            setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes, likedBy } : p));
         } catch (err) {
             console.error('Error dando like:', err);
         }
