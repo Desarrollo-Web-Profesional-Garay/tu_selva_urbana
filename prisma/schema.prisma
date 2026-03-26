@@ -17,6 +17,8 @@ model User {
   posts     Post[]
   orders    Order[]
   plants    UserPlant[]
+  likedPosts Post[]     @relation("UserLikes")
+  comments  Comment[]
 }
 
 model Plant {
@@ -59,6 +61,18 @@ model Post {
   authorId  Int
   plant     Plant?   @relation(fields: [plantId], references: [id])
   plantId   Int?
+  likedBy   User[]   @relation("UserLikes")
+  comments  Comment[]
+  createdAt DateTime @default(now())
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
   createdAt DateTime @default(now())
 }
 

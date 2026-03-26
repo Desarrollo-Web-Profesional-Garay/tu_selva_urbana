@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('🌱 Sembrando base botánica masiva...');
+    console.log('🌱 Sembrando base botánica masiva (URLs Locales)...');
 
     await prisma.orderItem.deleteMany();
     await prisma.order.deleteMany();
@@ -17,85 +17,84 @@ async function main() {
         {
             slug: 'monstera',
             name: 'Monstera Deliciosa',
-            modelUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Flower/Flower.glb',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Monstera_deliciosa3.jpg/800px-Monstera_deliciosa3.jpg',
+            imageUrl: '/plants/monstera.jpg',
             light: ['Media'], petSafe: false, careLevel: 'normal', tag: '🪴 El ícono de internet', price: 35.0,
             careWater: 'Riega cada 7-10 días, dejando secar el sustrato.', careLight: 'Luz indirecta brillante.', careHumidity: 'Le gusta la humedad alta. Pulveriza sus hojas.'
         },
         {
             slug: 'zamioculca',
             name: 'Zamioculca (ZZ Plant)',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Zamioculcas_zamiifolia_1.jpg/800px-Zamioculcas_zamiifolia_1.jpg',
+            imageUrl: '/plants/zamioculca.jpg',
             light: ['Poca', 'Media'], petSafe: false, careLevel: 'facil', tag: '✨ Prácticamente indestructible', price: 25.0,
             careWater: 'Riega cada 3 semanas. Menos es más.', careLight: 'Sobrevive casi donde sea excepto sol directo.', careHumidity: 'No requiere atención.'
         },
         {
             slug: 'helecho',
             name: 'Helecho Boston',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Nephrolepis_exaltata_002.jpg/800px-Nephrolepis_exaltata_002.jpg',
+            imageUrl: '/plants/helecho.jpg',
             light: ['Media', 'Poca'], petSafe: true, careLevel: 'experto', tag: '🐾 100% Pet Friendly', price: 18.0,
             careWater: 'Mantén la tierra siempre ligeramente húmeda.', careLight: 'Luz tenue o filtrada.', careHumidity: 'Alerta máxima: necesita ambientes muy húmedos.'
         },
         {
             slug: 'sansevieria',
             name: 'Sansevieria Trifasciata',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Snake_Plant_%28Sansevieria_trifasciata_%27Laurentii%27%29.jpg/800px-Snake_Plant_%28Sansevieria_trifasciata_%27Laurentii%27%29.jpg',
+            imageUrl: '/plants/sansevieria.jpg',
             light: ['Poca', 'Media', 'Sol'], petSafe: false, careLevel: 'facil', tag: '🛡️ Purificadora de aire', price: 20.0,
             careWater: 'Riega cada 3 semanas.', careLight: 'Se adapta desde la sombra hasta el sol.', careHumidity: 'Tolera aire seco perfectamente.'
         },
         {
             slug: 'calathea',
             name: 'Calathea Ornata',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Goeppertia_ornata.jpg/800px-Goeppertia_ornata.jpg',
+            imageUrl: '/plants/calathea.jpg',
             light: ['Media'], petSafe: true, careLevel: 'experto', tag: '🎨 Belleza caprichosa', price: 28.0,
             careWater: 'Mantener sustrato húmedo. Usa agua filtrada.', careLight: 'Evita el sol a toda costa.', careHumidity: 'Muy exigente con la humedad ambiental.'
         },
         {
             slug: 'ficus-elastica',
             name: 'Ficus Robusta',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Ficus_elastica_1.jpg/800px-Ficus_elastica_1.jpg',
+            imageUrl: '/plants/ficus-elastica.jpg',
             light: ['Sol', 'Media'], petSafe: false, careLevel: 'normal', tag: '🌳 Elegancia oscura', price: 40.0,
             careWater: 'Riega cuando los primeros 5cm del sustrato estén secos.', careLight: 'Mucha luz indirecta o sol de la mañana.', careHumidity: 'Humedad media a alta.'
         },
         {
             slug: 'pothos',
             name: 'Pothos Dorado',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Epipremnum_aureum_1.jpg/800px-Epipremnum_aureum_1.jpg',
+            imageUrl: '/plants/pothos.jpg',
             light: ['Poca', 'Media'], petSafe: false, careLevel: 'facil', tag: '🌿 Ideal para novatos', price: 15.0,
             careWater: 'Tolera olvidos. Riega cada 1-2 semanas.', careLight: 'Luz indirecta. Puede perder el dorado en sombra extrema.', careHumidity: 'Se adapta a cualquier ambiente.'
         },
         {
             slug: 'spathiphyllum',
             name: 'Cuna de Moisés',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Spathiphyllum_cochlearispathum_RTBG.jpg/800px-Spathiphyllum_cochlearispathum_RTBG.jpg',
+            imageUrl: '/plants/spathiphyllum.jpg',
             light: ['Poca', 'Media'], petSafe: false, careLevel: 'normal', tag: '🕊️ Flores la mayor parte del año', price: 22.0,
             careWater: 'Acusa falta de agua bajando las hojas. Reanimación rápida.', careLight: 'Luz indirecta media.', careHumidity: 'Humedad alta para evitar puntas marrones.'
         },
         {
             slug: 'alocasia-zebrina',
             name: 'Alocasia Zebrina',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Alocasia_zebrina_00.jpg/800px-Alocasia_zebrina_00.jpg',
+            imageUrl: '/plants/alocasia-zebrina.jpg',
             light: ['Media'], petSafe: false, careLevel: 'experto', tag: '🦓 Tallos de cebra exóticos', price: 55.0,
             careWater: 'Prefiere humedad constante, no mojado.', careLight: 'Luz brillante indirecta.', careHumidity: 'Altísima humedad, ideal para invernaderos interiores.'
         },
         {
             slug: 'pilea',
             name: 'Pilea Peperomioides',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Pilea_peperomioides_1.jpg/800px-Pilea_peperomioides_1.jpg',
+            imageUrl: '/plants/pilea.jpg',
             light: ['Media'], petSafe: true, careLevel: 'normal', tag: '💰 La planta del dinero china', price: 19.0,
             careWater: 'Dejar secar bien entre riegos para evitar hongos.', careLight: 'Luz indirecta moderada.', careHumidity: 'Humedad media normal de hogar.'
         },
         {
             slug: 'string-of-pearls',
             name: 'Collar de Perlas',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Curio_rowleyanus_%28String_of_pearls%29.jpg/800px-Curio_rowleyanus_%28String_of_pearls%29.jpg',
+            imageUrl: '/plants/string-of-pearls.jpg',
             light: ['Sol', 'Media'], petSafe: false, careLevel: 'experto', tag: '📿 Suculenta colgante', price: 24.0,
             careWater: 'Como suculenta, muy poca agua. Espera a que las perlas apenas se encojan.', careLight: 'Ponerla justo en una ventana con mucho sol indirecto.', careHumidity: 'Prefiere ambientes secos.'
         },
         {
             slug: 'ficus-lyrata',
             name: 'Ficus Lyrata',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Ficus_lyrata_2.jpg/800px-Ficus_lyrata_2.jpg',
+            imageUrl: '/plants/ficus-lyrata.jpg',
             light: ['Sol', 'Media'], petSafe: false, careLevel: 'normal', tag: '🎻 Hojas gigantes', price: 65.0,
             careWater: 'Humedad consistente. No soporta encharcamiento ni sequía.', careLight: 'Adora el sol indirecto masivo.', careHumidity: 'Limpiar el polvo de sus hojas fomenta su absorción de luz.'
         }

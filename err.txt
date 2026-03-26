@@ -1,0 +1,41 @@
+
+Invalid `prisma.post.findMany()` invocation in
+C:\Users\cesar\Downloads\tu-selva-urbana-backend\test_prisma.js:7:41
+
+  4 async function test() {
+  5     try {
+  6         console.log('Testing...');
+→ 7         const posts = await prisma.post.findMany({
+              include: {
+                author: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true
+                  }
+                },
+                plant: true,
+                likedBy: {
+                  select: {
+                    id: true
+                  }
+                },
+                comments: {
+                ~~~~~~~~
+                  include: {
+                    author: {
+                      select: {
+                        id: true,
+                        name: true,
+                        avatar: true
+                      }
+                    }
+                  }
+                }
+              },
+              orderBy: {
+                createdAt: "desc"
+              }
+            })
+
+Unknown field `comments` for include statement on model `Post`. Available options are marked with ?.
