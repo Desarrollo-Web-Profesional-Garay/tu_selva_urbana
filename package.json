@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "nodemon src/server.js",
         "build": "node prisma-build.js",
-        "start": "node prisma/seed.js && node fix-images.js && node force-urls.js && node src/server.js",
+        "start": "npx prisma db push --accept-data-loss && node prisma/seed.js && node fix-images.js && node src/server.js",
         "db:migrate": "npx prisma migrate dev",
         "db:seed": "node prisma/seed.js",
         "db:studio": "npx prisma studio"
