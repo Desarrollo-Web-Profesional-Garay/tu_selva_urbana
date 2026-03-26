@@ -6,7 +6,7 @@ import EditProfileModal from '../components/EditProfileModal';
 import { useNavigate } from 'react-router-dom';
 
 export default function MyAccount() {
-    const { user, posts, myPlants } = useContext(GlobalContext);
+    const { user, posts, myPlants, logout } = useContext(GlobalContext);
     const [activeTab, setActiveTab] = useState('posts');
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
     const navigate = useNavigate();
@@ -41,14 +41,24 @@ export default function MyAccount() {
                     </div>
                 </div>
 
-                <motion.button
-                    onClick={() => setIsEditProfileOpen(true)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 bg-bone text-forest px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-all self-start md:self-auto"
-                >
-                    <Settings size={18} /> Editar Perfil
-                </motion.button>
+                <div className="flex flex-col gap-3 self-start md:self-auto w-full md:w-auto mt-4 md:mt-0">
+                    <motion.button
+                        onClick={() => setIsEditProfileOpen(true)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center gap-2 bg-bone text-forest px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-all"
+                    >
+                        <Settings size={18} /> Editar Perfil
+                    </motion.button>
+                    <motion.button
+                        onClick={() => { logout(); navigate('/login'); }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center gap-2 bg-terra/10 text-terra hover:bg-terra hover:text-white border border-terra/20 px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-all sm:hidden lg:flex"
+                    >
+                        <LogOut size={18} /> Cerrar Sesión
+                    </motion.button>
+                </div>
             </header>
 
             {/* Toggle Tabs */}

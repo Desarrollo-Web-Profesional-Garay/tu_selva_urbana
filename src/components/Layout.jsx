@@ -34,7 +34,7 @@ export default function Layout() {
                     </h1>
                 </div>
 
-                <nav className="flex-1 px-8 space-y-4 mt-8">
+                <nav className="flex-1 px-8 space-y-4 mt-8 overflow-y-auto custom-scrollbar pb-6">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         return (

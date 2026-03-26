@@ -2,8 +2,10 @@ import { useRef, useLayoutEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion } from 'framer-motion';
-import { ArrowDown, LogIn, UserPlus } from 'lucide-react';
+import { ArrowDown, LogIn, UserPlus, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { GlobalContext } from '../context/GlobalContext';
 
 import HeroScene from '../components/3d/HeroScene';
 import Quiz from './Quiz'; // We embed the Quiz directly into the landing page flow
@@ -13,6 +15,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function LandingPage() {
     const containerRef = useRef();
     const navigate = useNavigate();
+    const { isAuthenticated } = useContext(GlobalContext);
     // Use state callback ref so GSAP reliably waits for the Canvas to mount the ThreeJS scene
     const [modelNode, setModelNode] = useState(null);
 
@@ -60,24 +63,38 @@ export default function LandingPage() {
                     <span className="text-forest font-black text-lg tracking-tight">Tu Selva Urbana</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/login')}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-forest border-2 border-forest/20 hover:border-forest/50 bg-white/60 backdrop-blur-md transition-all"
-                    >
-                        <LogIn size={16} />
-                        Iniciar Sesión
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/login')}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-terra hover:bg-[#D36C52] shadow-lg shadow-terra/30 transition-all"
-                    >
-                        <UserPlus size={16} />
-                        Crear Cuenta
-                    </motion.button>
+                    {!isAuthenticated ? (
+                        <>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => navigate('/login')}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-forest border-2 border-forest/20 hover:border-forest/50 bg-white/60 backdrop-blur-md transition-all"
+                            >
+                                <LogIn size={16} />
+                                Iniciar Sesión
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => navigate('/login')}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-terra hover:bg-[#D36C52] shadow-lg shadow-terra/30 transition-all"
+                            >
+                                <UserPlus size={16} />
+                                Crear Cuenta
+                            </motion.button>
+                        </>
+                    ) : (
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/feed')}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-forest hover:bg-forest/90 shadow-lg shadow-forest/30 transition-all"
+                        >
+                            <Home size={16} />
+                            Ir a Mi Selva
+                        </motion.button>
+                    )}
                 </div>
             </motion.nav>
 

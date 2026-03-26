@@ -40,7 +40,12 @@ export default function Chatbot({ plantContext = null }) {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <motion.div 
+            drag 
+            dragConstraints={{ left: -1000, right: 0, top: -1000, bottom: 0 }} 
+            dragElastic={0.1} 
+            className="fixed bottom-6 right-6 z-50 flex flex-col items-end cursor-move"
+        >
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -128,6 +133,6 @@ export default function Chatbot({ plantContext = null }) {
             >
                 {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
             </motion.button>
-        </div>
+        </motion.div>
     );
 }
