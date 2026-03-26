@@ -95,8 +95,8 @@ export default function Catalog() {
 
                         {/* Details */}
                         <div className="p-6 flex flex-col flex-1">
-                            <h3 className="text-xl font-black text-forest mb-1">{plant.name}</h3>
-                            <div className="flex justify-between items-end mt-auto pt-4 border-t border-sage/10">
+                            <h3 className="text-xl font-black text-forest mb-1 leading-tight">{plant.name}</h3>
+                            <div className="flex flex-wrap justify-between items-center gap-3 mt-auto pt-4 border-t border-sage/10">
                                 <div>
                                     <p className="text-xs font-bold text-forest/50 uppercase tracking-wider mb-1">
                                         Nivel: {plant.careLevel}
@@ -108,9 +108,9 @@ export default function Catalog() {
 
                                 <button
                                     onClick={() => setSelectedPlant(plant)}
-                                    className="bg-forest text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-sage transition-all hover:scale-105 shadow-md shadow-forest/20"
+                                    className="bg-forest text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-sage transition-all hover:scale-105 shadow-md shadow-forest/20 text-sm whitespace-nowrap"
                                 >
-                                    <ShoppingBag size={18} /> Adoptar
+                                    <ShoppingBag size={16} /> Adoptar
                                 </button>
                             </div>
                         </div>
