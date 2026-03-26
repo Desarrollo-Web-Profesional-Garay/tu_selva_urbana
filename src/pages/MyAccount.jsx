@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, Heart, MessageCircle, Settings, Camera, PlusCircle, Sparkles } from 'lucide-react';
+import { Edit2, Heart, MessageCircle, Settings, Camera, PlusCircle, Sparkles, LogOut } from 'lucide-react';
 import EditProfileModal from '../components/EditProfileModal';
 import { useNavigate } from 'react-router-dom';
 

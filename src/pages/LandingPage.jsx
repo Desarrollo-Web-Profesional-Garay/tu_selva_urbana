@@ -77,7 +77,7 @@ export default function LandingPage() {
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate('/register')}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-terra hover:bg-[#D36C52] shadow-lg shadow-terra/30 transition-all"
                             >
                                 <UserPlus size={16} />
