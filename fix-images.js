@@ -2,39 +2,24 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function fixImages() {
-    console.log('🔍 Buscando imágenes de Unsplash rotas en Producción...');
+    console.log('🔍 Sincronizando imágenes de Posts con las de sus Plantas en Producción...');
     try {
         const posts = await prisma.post.findMany({
-            where: {
-                image: {
-                    contains: 'unsplash'
-                }
-            }
+            include: { plant: true }
         });
 
-        if (posts.length > 0) {
-            console.log(`🛠️ Reemplazando ${posts.length} posts rotos con activos locales...`);
-            
-            // Reemplazos variados para no hacer todo igual
-            const validImages = [
-                '/plants/monstera.jpg',
-                '/plants/ficus-elastica.jpg',
-                '/plants/helecho.jpg',
-                '/plants/sansevieria.jpg'
-            ];
-
-            for (let i = 0; i < posts.length; i++) {
+        let updated = 0;
+        for (const post of posts) {
+            // Check if the plant has a valid image and the post image is different or broken
+            if (post.plant && post.plant.imageUrl) {
                 await prisma.post.update({
-                    where: { id: posts[i].id },
-                    data: {
-                        image: validImages[i % validImages.length]
-                    }
+                    where: { id: post.id },
+                    data: { image: post.plant.imageUrl }
                 });
+                updated++;
             }
-            console.log('✅ Reemplazo masivo completado.');
-        } else {
-            console.log('✨ No se encontraron imágenes rotas.');
         }
+        console.log(`✅ Sincronización completada. ${updated} posts actualizados con los nombres de archivo correctos.`);
     } catch (err) {
         console.error('❌ Error en el script de limpieza:', err.message);
     } finally {
