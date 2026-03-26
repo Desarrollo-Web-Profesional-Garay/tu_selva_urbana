@@ -36,8 +36,47 @@ export const authAPI = {
 
 // ========== PLANTS ==========
 export const plantsAPI = {
-    getAll: () => request('/plants'),
+    // Obtener todas las plantas (con filtros opcionales)
+    getAll: (filters = {}) => {
+        const params = new URLSearchParams();
+        if (filters.careLevel && filters.careLevel !== 'todas') params.append('careLevel', filters.careLevel);
+        if (filters.petSafe === true) params.append('petSafe', 'true');
+        if (filters.search) params.append('search', filters.search);
+        
+        const queryString = params.toString();
+        return request(`/plants${queryString ? `?${queryString}` : ''}`);
+    },
+    
+    // Obtener planta por ID
     getById: (id) => request(`/plants/${id}`),
+    
+    // Obtener planta por slug
+    getBySlug: (slug) => request(`/plants/slug/${slug}`),
+    
+    // Obtener plantas por nivel de cuidado
+    getByCareLevel: (level) => request(`/plants/care-level/${level}`),
+    
+    // Obtener plantas pet friendly
+    getPetFriendly: () => request('/plants/pet-friendly'),
+    
+    // Crear una nueva planta (requiere auth)
+    create: (plantData) => request('/plants', { 
+        method: 'POST', 
+        body: JSON.stringify(plantData) 
+    }),
+    
+    // Actualizar una planta (requiere auth)
+    update: (id, plantData) => request(`/plants/${id}`, { 
+        method: 'PUT', 
+        body: JSON.stringify(plantData) 
+    }),
+    
+    // Eliminar una planta (requiere auth)
+    delete: (id) => request(`/plants/${id}`, { 
+        method: 'DELETE' 
+    }),
+    
+    // Quiz de recomendaciones
     quiz: (answers) =>
         request('/plants/quiz', { method: 'POST', body: JSON.stringify(answers) }),
 };

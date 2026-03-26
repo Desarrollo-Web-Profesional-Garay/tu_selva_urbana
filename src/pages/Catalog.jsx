@@ -1,15 +1,17 @@
-import { useContext, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Info, Filter, Sparkles } from 'lucide-react';
-import { GlobalContext } from '../context/GlobalContext';
+import { ShoppingBag, Info, Filter, Sparkles, Loader2 } from 'lucide-react';
+import { plantsAPI } from '../services/api';
 import CheckoutModal from '../components/CheckoutModal';
 import PlantDetailsModal from '../components/PlantDetailsModal';
 
 export default function Catalog() {
-    const { plantDatabase } = useContext(GlobalContext);
+    const [plants, setPlants] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedPlant, setSelectedPlant] = useState(null);
     const [infoPlant, setInfoPlant] = useState(null);
-    const [activeFilter, setActiveFilter] = useState('todas'); // 'todas', 'facil', 'normal', 'experto', 'pet'
+    const [activeFilter, setActiveFilter] = useState('todas');
 
     const filters = [
         { id: 'todas', label: 'Todas las Plantas' },
@@ -19,11 +21,59 @@ export default function Catalog() {
         { id: 'pet', label: 'Pet Friendly' },
     ];
 
-    const filteredPlants = plantDatabase.filter(plant => {
-        if (activeFilter === 'todas') return true;
-        if (activeFilter === 'pet') return plant.petSafe;
-        return plant.careLevel === activeFilter;
-    });
+    // Cargar plantas cuando cambia el filtro
+    useEffect(() => {
+        loadPlants();
+    }, [activeFilter]);
+
+    const loadPlants = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            let data;
+            
+            if (activeFilter === 'pet') {
+                data = await plantsAPI.getPetFriendly();
+            } else if (activeFilter !== 'todas') {
+                data = await plantsAPI.getByCareLevel(activeFilter);
+            } else {
+                data = await plantsAPI.getAll();
+            }
+            
+            setPlants(data);
+        } catch (err) {
+            setError(err.message);
+            console.error('Error loading plants:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddToCart = (plant) => {
+        setSelectedPlant(plant);
+    };
+
+    if (loading) {
+        return (
+            <div className="w-full max-w-7xl mx-auto pb-24 flex justify-center items-center min-h-[400px]">
+                <Loader2 className="animate-spin text-forest" size={48} />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="w-full max-w-7xl mx-auto pb-24 text-center py-20">
+                <p className="text-red-500 mb-4">{error}</p>
+                <button 
+                    onClick={loadPlants}
+                    className="bg-forest text-white px-6 py-2 rounded-full hover:bg-opacity-90 transition-all"
+                >
+                    Reintentar
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-7xl mx-auto pb-24">
@@ -53,10 +103,11 @@ export default function Catalog() {
                     <button
                         key={filter.id}
                         onClick={() => setActiveFilter(filter.id)}
-                        className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeFilter === filter.id
+                        className={`px-6 py-2.5 rounded-full font-bold transition-all ${
+                            activeFilter === filter.id
                                 ? 'bg-forest text-white shadow-lg shadow-forest/20 scale-105'
                                 : 'bg-white text-forest/70 border border-sage/30 hover:bg-sage/10 hover:text-forest'
-                            }`}
+                        }`}
                     >
                         {filter.label}
                     </button>
@@ -65,7 +116,7 @@ export default function Catalog() {
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {filteredPlants.map((plant, index) => (
+                {plants.map((plant, index) => (
                     <motion.div
                         key={plant.id}
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -82,8 +133,14 @@ export default function Catalog() {
                                 </div>
                             )}
 
-                            {/* Imagen de alta fiabilidad extraída de Wikipedia Commons */}
-                            <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                            <img 
+                                src={plant.imageUrl || 'https://via.placeholder.com/400x500?text=Sin+Imagen'} 
+                                alt={plant.name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/400x500?text=Sin+Imagen';
+                                }}
+                            />
 
                             <button
                                 onClick={() => setInfoPlant(plant)}
@@ -99,15 +156,15 @@ export default function Catalog() {
                             <div className="flex justify-between items-end mt-auto pt-4 border-t border-sage/10">
                                 <div>
                                     <p className="text-xs font-bold text-forest/50 uppercase tracking-wider mb-1">
-                                        Nivel: {plant.careLevel}
+                                        Nivel: {plant.careLevel === 'facil' ? 'Fácil' : plant.careLevel === 'normal' ? 'Normal' : 'Experto'}
                                     </p>
                                     <p className="text-lg font-black text-forest">
-                                        ${plant.price.toFixed(2)}
+                                        ${typeof plant.price === 'number' ? plant.price.toFixed(2) : plant.price}
                                     </p>
                                 </div>
 
                                 <button
-                                    onClick={() => setSelectedPlant(plant)}
+                                    onClick={() => handleAddToCart(plant)}
                                     className="bg-forest text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-sage transition-all hover:scale-105 shadow-md shadow-forest/20"
                                 >
                                     <ShoppingBag size={18} /> Adoptar
@@ -118,7 +175,7 @@ export default function Catalog() {
                 ))}
             </div>
 
-            {filteredPlants.length === 0 && (
+            {plants.length === 0 && !loading && (
                 <div className="text-center py-20">
                     <Filter size={48} className="mx-auto text-sage/50 mb-4" />
                     <p className="text-xl text-forest/60 font-medium">No hay plantas que coincidan con este filtro.</p>
