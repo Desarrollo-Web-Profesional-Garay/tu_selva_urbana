@@ -6,6 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('🌱 Sembrando base botánica masiva (URLs Locales)...');
 
+    const plantsCount = await prisma.plant.count();
+    if (plantsCount > 0) {
+        console.log('🌱 La base de datos ya está poblada, omitiendo semilla destructiva.');
+        return;
+    }
+
     await prisma.orderItem.deleteMany();
     await prisma.order.deleteMany();
     await prisma.post.deleteMany();
