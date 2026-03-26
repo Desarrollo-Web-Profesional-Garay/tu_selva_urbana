@@ -128,7 +128,7 @@ export default function Feed() {
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => navigate('/catalogo')}
+                                        onClick={() => setSelectedPlantId(post.plant)}
                                         className="flex items-center gap-2 bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-forest/20 cursor-pointer"
                                     >
                                         <ShoppingBag size={16} /> Ver

@@ -34,9 +34,9 @@ export default function Layout() {
                     </h1>
                 </div>
 
-                <div className="flex-1 w-full flex flex-col">
+                <div className="flex-1 w-full flex flex-col min-h-0">
                     <div className="flex-1 w-full overflow-y-auto hide-scrollbar flex flex-col">
-                        <nav className="px-8 space-y-4 mt-8 pb-4">
+                        <nav className="px-8 space-y-4 mt-4 pb-4">
                             {navItems.map((item) => {
                                 const Icon = item.icon;
                                 return (
@@ -71,13 +71,14 @@ export default function Layout() {
                                 );
                             })}
                         </nav>
+                    </div>
 
-                        {/* User Profile & Post Action */}
-                        <div className="px-6 pb-6 mt-auto flex flex-col gap-4 border-t border-sage/10 pt-6">
-                            <button
-                                onClick={() => setIsScannerOpen(true)}
-                                className="w-full bg-gradient-to-r from-sage to-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-sage/30 flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:scale-[1.02] active:scale-95 border border-white/20 relative overflow-hidden group"
-                            >
+                    {/* User Profile & Post Action */}
+                    <div className="px-6 pb-6 pt-4 flex flex-col gap-4 border-t border-sage/10 shrink-0">
+                        <button
+                            onClick={() => setIsScannerOpen(true)}
+                            className="w-full bg-gradient-to-r from-sage to-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-sage/30 flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:scale-[1.02] active:scale-95 border border-white/20 relative overflow-hidden group"
+                        >
                                 <ScanLine size={20} className="group-hover:animate-pulse shrink-0" /> IA Scanner
                                 <div className="absolute top-0 left-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
                             </button>
@@ -115,7 +116,7 @@ export default function Layout() {
                             </div>
                         </div>
                     </div>
-                </div>
+
             </aside>
 
             {/* Main Content Area - Expansivo y sin restricciones de ancho */}
