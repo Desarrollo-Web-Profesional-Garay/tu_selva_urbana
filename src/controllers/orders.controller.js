@@ -3,7 +3,7 @@ const prisma = require('../config/db');
 // POST /api/orders
 exports.create = async (req, res) => {
     try {
-        const { items } = req.body;
+        const { items, address, paymentMethod } = req.body;
         // items = [{ plantId: 1, quantity: 2 }, ...]
 
         if (!items || items.length === 0) {
@@ -28,7 +28,9 @@ exports.create = async (req, res) => {
             data: {
                 userId: req.userId,
                 total,
-                status: 'pendiente',
+                status: 'pagado', // Asumimos pagado ya que viene del flow
+                address: address || null,
+                paymentMethod: paymentMethod || null,
                 items: { create: orderItems },
             },
             include: {

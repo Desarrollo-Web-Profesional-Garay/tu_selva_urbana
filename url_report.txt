@@ -1,0 +1,21 @@
+=== URLs DE PLANTAS ===
+Helecho Boston: [/plants/helecho.jpg]
+Monstera Deliciosa: [/plants/monstera.jpg]
+Calathea Ornata: [/plants/calathea.jpg]
+Pothos Dorado: [/plants/pothos.jpg]
+Ficus Robusta: [/plants/ficus-elastica.jpg]
+Pilea Peperomioides: [/plants/pilea.jpg]
+Collar de Perlas: [/plants/string-of-pearls.jpg]
+Ficus Lyrata: [/plants/ficus-lyrata.jpg]
+Alocasia Zebrina: [/plants/alocasia-zebrina.jpg]
+Cuna de Moisés: [/plants/spathiphyllum.jpg]
+Zamioculca (ZZ Plant): [/plants/zamioculca.jpg]
+Sansevieria Trifasciata: [/plants/sansevieria.jpg]
+
+=== URLs DE POSTS ===
+Post 47: [/plants/monstera.jpg]
+Post 52: [/plants/monstera.jpg]
+Post 50: [/plants/ficus-lyrata.jpg]
+Post 49: [/plants/helecho.jpg]
+Post 51: [/plants/alocasia-zebrina.jpg]
+Post 48: [/plants/sansevieria.jpg]
