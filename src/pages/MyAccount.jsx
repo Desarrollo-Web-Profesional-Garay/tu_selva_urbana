@@ -1,15 +1,35 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, Heart, MessageCircle, Settings, Camera, PlusCircle, Sparkles, LogOut } from 'lucide-react';
+import { Edit2, Heart, MessageCircle, Settings, Camera, PlusCircle, Sparkles, LogOut, Package } from 'lucide-react';
 import EditProfileModal from '../components/EditProfileModal';
+import OrderTracker from '../components/OrderTracker';
 import { useNavigate } from 'react-router-dom';
 
 export default function MyAccount() {
     const { user, posts, myPlants, logout } = useContext(GlobalContext);
     const [activeTab, setActiveTab] = useState('posts');
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+    const [orders, setOrders] = useState([]);
+    const [loadingOrders, setLoadingOrders] = useState(false);
     const navigate = useNavigate();
+
+    const fetchOrders = async () => {
+        setLoadingOrders(true);
+        try {
+            const data = await import('../services/api').then(m => m.ordersAPI.getAll());
+            setOrders(data);
+        } catch (err) {
+            console.error("Error fetching orders", err);
+        }
+        setLoadingOrders(false);
+    };
+
+    useEffect(() => {
+        if (activeTab === 'orders') {
+            fetchOrders();
+        }
+    }, [activeTab]);
 
     const userPosts = posts.filter(p => p.author?.id === user?.id);
     const likedPosts = posts.filter(p => p.likedBy?.some(u => u.id === user?.id));
@@ -62,22 +82,28 @@ export default function MyAccount() {
             </header>
 
             {/* Toggle Tabs */}
-            <div className="flex bg-white/50 backdrop-blur-md rounded-2xl p-1 mb-8 max-w-md mx-auto xl:mx-0 border border-sage/20">
+            <div className="flex bg-white/50 backdrop-blur-md rounded-2xl p-1 mb-8 max-w-2xl mx-auto xl:mx-0 border border-sage/20 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('posts')}
-                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'posts' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
+                    className={`flex-1 min-w-[120px] py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'posts' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
                 >
-                    Mis Publicaciones
+                    Publicaciones
                 </button>
                 <button
                     onClick={() => setActiveTab('plants')}
-                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'plants' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
+                    className={`flex-1 min-w-[120px] py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'plants' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
                 >
-                    Mis Plantas
+                    Plantas
+                </button>
+                <button
+                    onClick={() => setActiveTab('orders')}
+                    className={`flex-1 min-w-[120px] py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'orders' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
+                >
+                    Mis Pedidos
                 </button>
                 <button
                     onClick={() => setActiveTab('likes')}
-                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'likes' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
+                    className={`flex-1 min-w-[120px] py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'likes' ? 'bg-white text-forest shadow-md' : 'text-forest/50 hover:text-forest/80'}`}
                 >
                     Favoritos
                 </button>
@@ -211,6 +237,47 @@ export default function MyAccount() {
                                         className="bg-terra text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-terra/20 flex items-center gap-2"
                                     >
                                         <Sparkles size={18} /> Realizar Diagnóstico
+                                    </motion.button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'orders' && (
+                        <div className="flex flex-col gap-6">
+                            {loadingOrders ? (
+                                <div className="py-20 text-center text-forest/50 font-bold">Cargando pedidos...</div>
+                            ) : orders.length > 0 ? orders.map((o) => (
+                                <div key={o.id} className="bg-white/80 backdrop-blur-md rounded-[32px] p-6 shadow-sm border border-sage/20">
+                                    <div className="flex justify-between items-center border-b border-sage/20 pb-4 mb-4">
+                                        <div className="font-bold text-forest text-lg">Orden #{o.id}</div>
+                                        <div className="text-sm bg-terra/10 text-terra px-3 py-1 rounded-full font-bold">Total: ${o.total.toFixed(2)}</div>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        {o.items.map(i => (
+                                            <div key={i.id} className="flex gap-4 items-center">
+                                                <img src={i.plant.imageUrl} alt={i.plant.name} className="w-16 h-16 rounded-xl object-cover bg-bone" />
+                                                <div className="font-bold text-forest text-sm">{i.quantity}x {i.plant.name}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <OrderTracker order={o} />
+                                </div>
+                            )) : (
+                                <div className="col-span-full py-20 text-center flex flex-col items-center">
+                                    <div className="w-20 h-20 bg-bone rounded-full flex items-center justify-center mx-auto mb-4 text-forest/30 shadow-inner">
+                                        <Package size={40} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-forest mb-2">Aún no tienes pedidos</h3>
+                                    <p className="text-forest/60 max-w-sm mb-8">Adopta tu primera planta y síguele el rastro hasta tu hogar.</p>
+                                    
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }} 
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => navigate('/catalog')}
+                                        className="bg-forest text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-forest/20 flex items-center gap-2"
+                                    >
+                                        <Package size={18} /> Ver Catálogo
                                     </motion.button>
                                 </div>
                             )}

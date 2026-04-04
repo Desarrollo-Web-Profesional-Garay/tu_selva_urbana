@@ -55,8 +55,8 @@ export const postsAPI = {
 
 // ========== ORDERS ==========
 export const ordersAPI = {
-    create: (items) =>
-        request('/orders', { method: 'POST', body: JSON.stringify({ items }) }),
+    create: (items, address, paymentMethod) =>
+        request('/orders', { method: 'POST', body: JSON.stringify({ items, address, paymentMethod }) }),
     getAll: () => request('/orders'),
 };
 

@@ -32,6 +32,22 @@ export default function EditProfileModal({ isOpen, onClose }) {
         setLoading(false);
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 500 * 1024) { // 500KB límite sugerido
+            setError('La imagen es muy pesada. Trata de subir una de menos de 500KB.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAvatar(reader.result);
+        };
+        reader.readAsDataURL(file);
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -74,6 +90,10 @@ export default function EditProfileModal({ isOpen, onClose }) {
                                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md bg-bone mb-4 transition-all"
                                     onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${name || 'User'}&background=ECECE5&color=2C3E2D` }}
                                 />
+                                <label className="cursor-pointer bg-white/50 border border-sage/30 text-forest text-sm font-bold py-2 px-4 rounded-full hover:bg-sage/20 transition-colors flex items-center gap-2 shadow-sm">
+                                    <ImageIcon size={16} /> Cambiar foto
+                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                                </label>
                             </div>
 
                             {/* Inputs */}
@@ -89,20 +109,6 @@ export default function EditProfileModal({ isOpen, onClose }) {
                                         onChange={(e) => setName(e.target.value)}
                                         className="w-full bg-white/50 border border-sage/30 rounded-xl py-3 px-4 text-forest focus:ring-2 focus:ring-sage focus:outline-none transition-all"
                                     />
-                                </div>
-
-                                <div>
-                                    <label className="flex items-center gap-2 text-sm font-bold text-forest/70 mb-2">
-                                        <ImageIcon size={16} /> URL de tu Avatar
-                                    </label>
-                                    <input
-                                        type="url"
-                                        value={avatar}
-                                        onChange={(e) => setAvatar(e.target.value)}
-                                        placeholder="https://ejemplo.com/mifoto.jpg"
-                                        className="w-full bg-white/50 border border-sage/30 rounded-xl py-3 px-4 text-forest focus:ring-2 focus:ring-sage focus:outline-none transition-all text-sm"
-                                    />
-                                    <p className="text-xs text-forest/40 mt-2">Puedes dejarlo en blanco para usar un avatar automático.</p>
                                 </div>
                             </div>
 
