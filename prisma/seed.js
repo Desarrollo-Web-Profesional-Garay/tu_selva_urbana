@@ -111,9 +111,9 @@ async function main() {
     // Usuarios
     const hashedPassword = await bcrypt.hash('123456', 10);
     const users = await Promise.all([
-        prisma.user.create({ data: { name: 'Lucía P.', email: 'lucia@demo.com', password: hashedPassword, avatar: 'https://i.pravatar.cc/150?u=lucia' } }),
-        prisma.user.create({ data: { name: 'Carlos M.', email: 'carlos@demo.com', password: hashedPassword, avatar: 'https://i.pravatar.cc/150?u=carlos' } }),
-        prisma.user.create({ data: { name: 'Ana Selva', email: 'ana@demo.com', password: hashedPassword, avatar: 'https://i.pravatar.cc/150?u=ana' } })
+        prisma.user.create({ data: { name: 'Lucía P.', email: 'lucia@demo.com', password: hashedPassword, avatar: 'https://i.pravatar.cc/150?u=lucia', phone: '+525512345678', emailVerified: true } }),
+        prisma.user.create({ data: { name: 'Carlos M.', email: 'carlos@demo.com', password: hashedPassword, avatar: 'https://i.pravatar.cc/150?u=carlos', phone: '+525587654321', emailVerified: true } }),
+        prisma.user.create({ data: { name: 'Ana Selva', email: 'ana@demo.com', password: hashedPassword, avatar: 'https://i.pravatar.cc/150?u=ana', phone: '+525511223344', emailVerified: true } })
     ]);
 
     // Posts Demostrativos

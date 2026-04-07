@@ -49,8 +49,18 @@ async function fixAllImages() {
     }
 
     console.log(`\n🌿 Resultado: ${updated} plantas y ${postsUpdated} posts actualizados con URLs locales.`);
+
+    // Marcar usuarios existentes que aún no tengan emailVerified como verificados
+    const verifyResult = await prisma.user.updateMany({
+        where: { emailVerified: false, verifyCode: null },
+        data: { emailVerified: true },
+    });
+    if (verifyResult.count > 0) {
+        console.log(`✅ ${verifyResult.count} usuarios existentes marcados como verificados.`);
+    }
 }
 
 fixAllImages()
     .catch(e => { console.error('❌ Error:', e); process.exit(1); })
     .finally(() => prisma.$disconnect());
+

@@ -8,17 +8,23 @@ datasource db {
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  name      String
-  email     String      @unique
-  password  String
-  avatar    String?
-  createdAt DateTime    @default(now())
-  posts     Post[]
-  orders    Order[]
-  plants    UserPlant[]
-  likedPosts Post[]     @relation("UserLikes")
-  comments  Comment[]
+  id             Int         @id @default(autoincrement())
+  name           String
+  email          String      @unique
+  password       String
+  avatar         String?
+  phone          String?
+  emailVerified  Boolean     @default(false)
+  verifyCode     String?
+  verifyExpires  DateTime?
+  resetToken     String?
+  resetExpires   DateTime?
+  createdAt      DateTime    @default(now())
+  posts          Post[]
+  orders         Order[]
+  plants         UserPlant[]
+  likedPosts     Post[]      @relation("UserLikes")
+  comments       Comment[]
 }
 
 model Plant {
