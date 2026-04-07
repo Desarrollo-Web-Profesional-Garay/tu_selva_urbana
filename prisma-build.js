@@ -2,13 +2,9 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const envPath = path.join(__dirname, '.env');
-let createdEnv = false;
-
-if (!process.env.DATABASE_URL && !fs.existsSync(envPath)) {
-    console.log('⚠️ No se detectó DATABASE_URL en Nixpacks. Creando dummy temporal...');
-    fs.writeFileSync(envPath, 'DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"');
-    createdEnv = true;
+// Evitar que el build de Railway falle por falta de variables
+if (!process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/postgres";
 }
 
 try {
@@ -18,9 +14,4 @@ try {
 } catch (err) {
     console.error('❌ Error Prisma:', err.message);
     process.exit(1);
-} finally {
-    if (createdEnv && fs.existsSync(envPath)) {
-        fs.unlinkSync(envPath);
-        console.log('🧹 Archivo Dummy limpiado para start de Railway.');
-    }
 }

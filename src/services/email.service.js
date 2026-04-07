@@ -8,12 +8,14 @@ const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true, // SSL
     auth: {
         user: process.env['BREVO_USER'],
         pass: process.env['BREVO_SMTP_KEY'],
     },
+    connectionTimeout: 10000, // 10 segundos
+    greetingTimeout: 10000,
 });
 
 // El FROM debe ser un remitente verificado en Brevo (tu email real, no el login SMTP)
