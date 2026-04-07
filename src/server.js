@@ -23,9 +23,45 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/chat', require('./routes/chat.routes'));
 
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check + diagnóstico
+app.get('/api/health', async (req, res) => {
+    const prisma = require('./config/db');
+    let dbOk = false;
+    let pendingTableExists = false;
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        dbOk = true;
+        // Verificar si PendingRegistration existe
+        const tables = await prisma.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
+        pendingTableExists = tables.some(t => t.tablename === 'PendingRegistration');
+    } catch {}
+
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        db: dbOk ? 'connected' : 'error',
+        pendingRegistrationTable: pendingTableExists,
+        email: {
+            BREVO_USER: process.env.BREVO_USER ? '✅ set' : '❌ missing',
+            BREVO_SMTP_KEY: process.env.BREVO_SMTP_KEY ? '✅ set' : '❌ missing',
+            BREVO_FROM_EMAIL: process.env.BREVO_FROM_EMAIL || '❌ not set (using BREVO_USER)',
+            APP_URL: process.env.APP_URL || '❌ not set',
+        },
+    });
+});
+
+// Test de envío de email (temporal para debug)
+app.get('/api/test-email', async (req, res) => {
+    const to = req.query.to;
+    if (!to) return res.status(400).json({ error: 'Agrega ?to=tu@email.com' });
+
+    const { sendVerificationEmail } = require('./services/email.service');
+    const result = await sendVerificationEmail(to, 'Test', '123456');
+    res.json({
+        result,
+        from: process.env.BREVO_FROM_EMAIL || process.env.BREVO_USER,
+        to,
+    });
 });
 
 // 404 handler
