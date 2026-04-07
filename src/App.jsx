@@ -2,8 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useContext } from 'react';
 import { GlobalContext } from './context/GlobalContext';
 
-// Componentes de Estructura
+// Componentes de Estructura y Protección
 import Layout from './components/Layout';
+import AdminRoute from './components/AdminRoute'; // Asegúrate de haber creado este archivo
 
 // Páginas Públicas
 import LandingPage from './pages/LandingPage';
@@ -25,7 +26,7 @@ import PlantDetail from './pages/PlantDetail';
 import AdminPanel from './pages/AdminPanel';
 
 /**
- * Componente para proteger rutas que requieren autenticación.
+ * Componente para proteger rutas que requieren autenticación general.
  * Redirige al login si el usuario no ha iniciado sesión.
  */
 function ProtectedRoute({ children }) {
@@ -47,13 +48,14 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/quiz" element={<Quiz />} />
 
-                {/* 2. RUTA DE ADMINISTRACIÓN (Protegida, pero sin el Layout estándar) */}
+                {/* 2. RUTA DE ADMINISTRACIÓN (Protegida por Rol Admin) */}
+                {/* Si no es admin, AdminRoute lo mandará automáticamente a /feed */}
                 <Route 
                     path="/admin" 
                     element={
-                        <ProtectedRoute>
+                        <AdminRoute>
                             <AdminPanel />
-                        </ProtectedRoute>
+                        </AdminRoute>
                     } 
                 />
 
@@ -77,7 +79,7 @@ function App() {
                     <Route path="/detalle-planta" element={<PlantDetail />} />
                 </Route>
 
-                {/* 4. FALLBACK (Redirección por defecto) */}
+                {/* 4. FALLBACK (Redirección por defecto si la ruta no existe) */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>
