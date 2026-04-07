@@ -50,9 +50,9 @@ async function fixAllImages() {
 
     console.log(`\n🌿 Resultado: ${updated} plantas y ${postsUpdated} posts actualizados con URLs locales.`);
 
-    // Marcar usuarios existentes que aún no tengan emailVerified como verificados
+    // Asegurar que usuarios existentes tengan emailVerified = true
     const verifyResult = await prisma.user.updateMany({
-        where: { emailVerified: false, verifyCode: null },
+        where: { emailVerified: false },
         data: { emailVerified: true },
     });
     if (verifyResult.count > 0) {
@@ -63,4 +63,5 @@ async function fixAllImages() {
 fixAllImages()
     .catch(e => { console.error('❌ Error:', e); process.exit(1); })
     .finally(() => prisma.$disconnect());
+
 

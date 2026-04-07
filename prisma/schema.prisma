@@ -14,9 +14,7 @@ model User {
   password       String
   avatar         String?
   phone          String?
-  emailVerified  Boolean     @default(false)
-  verifyCode     String?
-  verifyExpires  DateTime?
+  emailVerified  Boolean     @default(true)
   resetToken     String?
   resetExpires   DateTime?
   createdAt      DateTime    @default(now())
@@ -25,6 +23,17 @@ model User {
   plants         UserPlant[]
   likedPosts     Post[]      @relation("UserLikes")
   comments       Comment[]
+}
+
+model PendingRegistration {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password      String
+  phone         String
+  verifyCode    String
+  verifyExpires DateTime
+  createdAt     DateTime @default(now())
 }
 
 model Plant {
