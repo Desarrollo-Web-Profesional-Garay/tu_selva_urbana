@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminCatalog from '../components/AdminCatalog';
 import AdminOrders from '../components/AdminOrders';
+import AdminUsers from '../components/AdminUsers'; // Importado correctamente
 
 const AdminPanel = () => {
     // Estado para controlar la navegación del panel
@@ -25,13 +26,7 @@ const AdminPanel = () => {
             case 'Pedidos':
                 return <AdminOrders />;
             case 'Usuarios':
-                return (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-20 text-center">
-                        <div className="text-6xl mb-4">👥</div>
-                        <h2 className="text-2xl font-bold text-gray-700">Gestión de Usuarios</h2>
-                        <p className="text-gray-500 mt-2">Próximamente: Control de roles y eliminación de cuentas.</p>
-                    </div>
-                );
+                return <AdminUsers />; // Ahora renderiza el componente real de gestión
             default:
                 return <AdminDashboard />;
         }
@@ -42,8 +37,8 @@ const AdminPanel = () => {
             {/* --- SIDEBAR (Menú Lateral) --- */}
             <aside className="w-20 md:w-64 bg-[#1a2e1a] text-white flex flex-col transition-all duration-300 shadow-2xl z-20">
                 <div className="p-6 text-center border-b border-white/10">
-                    <h2 className="text-xl font-bold tracking-tighter hidden md:block text-green-400">
-                        TU SELVA <span className="text-white text-xs block font-light">ADMIN PANEL</span>
+                    <h2 className="text-xl font-bold tracking-tighter hidden md:block text-green-400 uppercase">
+                        TU SELVA <span className="text-white text-[10px] block font-light tracking-widest">ADMIN PANEL</span>
                     </h2>
                     <span className="md:hidden text-2xl">🌿</span>
                 </div>
@@ -83,10 +78,10 @@ const AdminPanel = () => {
                 {/* Header Superior */}
                 <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <nav className="flex text-sm text-gray-500">
+                        <nav className="flex text-sm text-gray-500 font-medium">
                             <span className="hover:text-green-700 cursor-pointer">Panel</span>
-                            <span className="mx-2">/</span>
-                            <span className="font-semibold text-green-800 uppercase tracking-wider text-xs mt-1">
+                            <span className="mx-2 text-gray-300">/</span>
+                            <span className="font-bold text-green-800 uppercase tracking-wider text-[10px] mt-1 bg-green-50 px-2 py-0.5 rounded border border-green-100">
                                 {activeSection}
                             </span>
                         </nav>
@@ -111,20 +106,22 @@ const AdminPanel = () => {
                     <div className="max-w-6xl mx-auto">
                         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                             <div>
-                                <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+                                <h1 className="text-4xl font-black text-gray-900 tracking-tighter">
                                     {activeSection}
                                 </h1>
-                                <p className="text-gray-500 font-medium">
+                                <div className="h-1 w-12 bg-green-500 mt-2 rounded-full"></div>
+                                <p className="text-gray-500 font-medium mt-3">
                                     Gestión centralizada de <span className="text-green-700 font-bold italic">Tu Selva Urbana</span>.
                                 </p>
                             </div>
-                            <div className="text-xs bg-white px-3 py-1 rounded-full border border-gray-200 text-gray-400 font-mono shadow-sm">
+                            <div className="text-[10px] bg-white px-3 py-1.5 rounded-full border border-gray-200 text-gray-400 font-mono shadow-sm flex items-center gap-2">
+                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                                 Sync: {new Date().toLocaleTimeString()}
                             </div>
                         </header>
 
                         {/* Renderizado dinámico con animación suave */}
-                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
                             {renderContent()}
                         </div>
                     </div>
