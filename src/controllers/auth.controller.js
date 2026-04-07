@@ -22,11 +22,49 @@ exports.register = async (req, res) => {
         }
 
         const exists = await prisma.user.findUnique({ where: { email } });
-        if (exists) return res.status(400).json({ error: 'El email ya está registrado' });
 
+        // Si existe pero NO está verificado → permitir re-registro (actualizar datos)
+        if (exists && !exists.emailVerified) {
+            const hashed = await bcrypt.hash(password, 10);
+            const code = generateOTP();
+            const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+            const user = await prisma.user.update({
+                where: { email },
+                data: {
+                    name,
+                    password: hashed,
+                    phone,
+                    verifyCode: code,
+                    verifyExpires: expires,
+                },
+            });
+
+            // Enviar email
+            const emailResult = await sendVerificationEmail(email, name, code);
+            console.log(`📧 Re-registro ${email} — Email: ${emailResult.success ? '✅' : '❌'}`);
+
+            // Enviar SMS
+            const smsResult = await sendSMSCode(phone, code);
+            console.log(`📱 SMS ${phone} — ${smsResult.success ? '✅' : '❌ (simulado o error)'}`);
+
+            return res.status(200).json({
+                message: 'Código reenviado. Revisa tu email y SMS.',
+                email,
+                requiresVerification: true,
+                emailSent: emailResult.success,
+            });
+        }
+
+        // Si ya existe Y está verificado → bloquear
+        if (exists && exists.emailVerified) {
+            return res.status(400).json({ error: 'El email ya está registrado' });
+        }
+
+        // Nuevo usuario
         const hashed = await bcrypt.hash(password, 10);
         const code = generateOTP();
-        const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+        const expires = new Date(Date.now() + 15 * 60 * 1000);
 
         const user = await prisma.user.create({
             data: {
@@ -42,20 +80,21 @@ exports.register = async (req, res) => {
         });
 
         // Enviar email con código OTP
-        await sendVerificationEmail(email, name, code);
+        const emailResult = await sendVerificationEmail(email, name, code);
+        console.log(`📧 Registro ${email} — Email: ${emailResult.success ? '✅ enviado' : '❌ falló: ' + (emailResult.error || 'simulado')}`);
 
-        // Enviar SMS si hay teléfono
-        if (phone) {
-            await sendSMSCode(phone, code);
-        }
+        // Enviar SMS
+        const smsResult = await sendSMSCode(phone, code);
+        console.log(`📱 SMS ${phone} — ${smsResult.success ? '✅' : '❌ (simulado o error)'}`);
 
         res.status(201).json({
             message: 'Cuenta creada. Revisa tu email y SMS para el código de verificación.',
             email,
             requiresVerification: true,
+            emailSent: emailResult.success,
         });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en register:', err);
         res.status(500).json({ error: 'Error al registrar usuario' });
     }
 };
@@ -82,7 +121,7 @@ exports.verifyEmail = async (req, res) => {
             return res.status(400).json({ error: 'El código ha expirado. Solicita uno nuevo.' });
         }
 
-        // Marcar como verificado y limpiar código
+        // Marcar como verificado
         const verified = await prisma.user.update({
             where: { email },
             data: {
@@ -104,7 +143,7 @@ exports.verifyEmail = async (req, res) => {
             },
         });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en verifyEmail:', err);
         res.status(500).json({ error: 'Error al verificar el código' });
     }
 };
@@ -127,12 +166,12 @@ exports.resendCode = async (req, res) => {
             data: { verifyCode: code, verifyExpires: expires },
         });
 
-        await sendVerificationEmail(email, user.name, code);
+        const emailResult = await sendVerificationEmail(email, user.name, code);
         if (user.phone) await sendSMSCode(user.phone, code);
 
-        res.json({ message: 'Código reenviado al email y SMS.' });
+        res.json({ message: 'Código reenviado.', emailSent: emailResult.success });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en resendCode:', err);
         res.status(500).json({ error: 'Error al reenviar código' });
     }
 };
@@ -150,7 +189,7 @@ exports.login = async (req, res) => {
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return res.status(401).json({ error: 'Credenciales inválidas' });
 
-        // Si no ha verificado el email, reenviar código y pedir verificación
+        // Si no ha verificado el email, reenviar código
         if (!user.emailVerified) {
             const code = generateOTP();
             const expires = new Date(Date.now() + 15 * 60 * 1000);
@@ -158,13 +197,14 @@ exports.login = async (req, res) => {
                 where: { email },
                 data: { verifyCode: code, verifyExpires: expires },
             });
-            await sendVerificationEmail(email, user.name, code);
+            const emailResult = await sendVerificationEmail(email, user.name, code);
             if (user.phone) await sendSMSCode(user.phone, code);
 
             return res.status(403).json({
                 error: 'Email no verificado',
                 requiresVerification: true,
                 email,
+                emailSent: emailResult.success,
             });
         }
 
@@ -175,7 +215,7 @@ exports.login = async (req, res) => {
             user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
         });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en login:', err);
         res.status(500).json({ error: 'Error al iniciar sesión' });
     }
 };
@@ -186,13 +226,11 @@ exports.login = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-
         const user = await prisma.user.findUnique({ where: { email } });
-        // Por seguridad, siempre responder éxito aunque no exista el email
-        if (!user) return res.json({ message: 'Si el email existe, recibirás un enlace de recuperación.' });
+        if (!user) return res.json({ message: 'Si el email existe, recibirás un enlace.' });
 
         const token = crypto.randomBytes(32).toString('hex');
-        const expires = new Date(Date.now() + 30 * 60 * 1000); // 30 min
+        const expires = new Date(Date.now() + 30 * 60 * 1000);
 
         await prisma.user.update({
             where: { email },
@@ -206,7 +244,7 @@ exports.forgotPassword = async (req, res) => {
 
         res.json({ message: 'Si el email existe, recibirás un enlace de recuperación.' });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en forgotPassword:', err);
         res.status(500).json({ error: 'Error al procesar solicitud' });
     }
 };
@@ -242,7 +280,7 @@ exports.resetPassword = async (req, res) => {
 
         res.json({ message: 'Contraseña actualizada correctamente.' });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en resetPassword:', err);
         res.status(500).json({ error: 'Error al restablecer contraseña' });
     }
 };
