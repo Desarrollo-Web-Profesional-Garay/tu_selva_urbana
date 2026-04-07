@@ -218,25 +218,13 @@ export default function Login() {
                 setError(err.message || 'Error al crear cuenta');
             }
         } else {
+            // Login directo — ya no hay usuarios sin verificar en la tabla User
             try {
-                const data = await authAPI.login(form.email, form.password);
-                if (data.requiresVerification) {
-                    setPendingEmail(form.email);
-                    setPendingPhone('');
-                    setMode('verify');
-                } else {
-                    // login normal
-                    const result = await login(form.email, form.password);
-                    if (result.success) navigate('/feed');
-                    else setError(result.error);
-                }
+                const result = await login(form.email, form.password);
+                if (result.success) navigate('/feed');
+                else setError(result.error || 'Credenciales inválidas');
             } catch (err) {
-                if (err.message === 'Email no verificado') {
-                    setPendingEmail(form.email);
-                    setMode('verify');
-                } else {
-                    setError(err.message || 'Credenciales inválidas');
-                }
+                setError(err.message || 'Credenciales inválidas');
             }
         }
         setLoading(false);
@@ -245,14 +233,8 @@ export default function Login() {
     // Cuando verificación OTP tiene éxito — el backend devuelve token + user
     const onVerifySuccess = (data) => {
         localStorage.setItem('tsu_token', data.token);
-        // Actualizar contexto via login silencioso
-        login(form.email || pendingEmail, form.password).then(r => {
-            if (r?.success) navigate('/feed');
-            else {
-                // Si no hay password guardado (viene de email sin pass), intentar navegar igual
-                navigate('/feed');
-            }
-        }).catch(() => navigate('/feed'));
+        // Recargar para que el GlobalContext lea el token
+        window.location.href = '/feed';
     };
 
     const isRegister = mode === 'register';
