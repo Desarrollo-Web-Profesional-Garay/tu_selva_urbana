@@ -1,81 +1,70 @@
-const nodemailer = require('nodemailer');
-
 /**
- * Servicio de Email usando SMTP (Basado en la configuración de la imagen del usuario)
- * Host: smtp-relay.brevo.com
- * Port: 587
+ * Servicio de Email usando la API v3 de Brevo (Sendinblue)
+ * Recomendado para Railway para evitar errores de Connection Timeout.
  */
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false, // 587 usa TLS (StartTLS), no SSL directo
-    auth: {
-        user: process.env['BREVO_USER'], // Debe ser: a754b1001@smtp-brevo.com
-        pass: process.env['BREVO_SMTP_KEY'], // La clave xsmtpsib...
-    },
-    tls: {
-        // Esta opción es CRUCIAL para evitar el "Connection Timeout" en Railway
-        rejectUnauthorized: false
-    },
-    connectionTimeout: 10000, // 10 segundos
-});
-
-const FROM_EMAIL = process.env['BREVO_FROM_EMAIL'] || process.env['BREVO_USER'] || 'noreply@tuselvaurbana.com';
-const FROM = `"Tu Selva Urbana 🌿" <${FROM_EMAIL}>`;
-
 async function sendVerificationEmail(to, name, code) {
-    const html = `
-    <div style="font-family: sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #2C3E2D; text-align: center;">¡Hola, ${name}! 👋</h2>
-        <p style="text-align: center; font-size: 16px;">Usa el siguiente código para verificar tu cuenta:</p>
-        <div style="background: #f5f7f0; padding: 20px; text-align: center; border-radius: 10px; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #2C3E2D;">
-            ${code}
-        </div>
-        <p style="text-align: center; color: #9ab09e; font-size: 12px; margin-top: 20px;">Válido por 15 minutos.</p>
-    </div>`;
+    const apiKey = process.env['BREVO_SMTP_KEY'];
+    const fromEmail = process.env['BREVO_FROM_EMAIL'] || 'cesarenriquegaraygarcia50@gmail.com';
 
-    const mailOptions = {
-        from: FROM,
-        to,
-        subject: `${code} — Tu código de verificación | Tu Selva Urbana`,
-        html,
-    };
+    if (!apiKey) {
+        console.log("⚠️ No se encontró la clave de API (BREVO_SMTP_KEY)");
+        return { success: false, error: 'API Key missing' };
+    }
 
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Email enviado exitosamente a ${to}`);
-        return { success: true, messageId: info.messageId };
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey.trim(), // Limpiar espacios accidentales
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { name: "Tu Selva Urbana 🌿", email: fromEmail },
+                to: [{ email: to, name: name }],
+                subject: `${code} — Código de Verificación`,
+                htmlContent: `<h2>¡Hola, ${name}! 👋</h2><p>Tu código es: <b>${code}</b></p>`
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log(`✅ Email enviado vía API a ${to}`);
+            return { success: true };
+        } else {
+            console.error('❌ Error de Brevo API:', data);
+            // Si el error es "unauthorized", es porque la clave en Railway no es la de la pestaña "API keys"
+            return { success: false, error: data.code || data.message };
+        }
     } catch (err) {
-        console.error(`❌ Error enviando email:`, err.message);
+        console.error('❌ Error de conexión:', err.message);
         return { success: false, error: err.message };
     }
 }
 
 async function sendPasswordResetEmail(to, name, resetLink) {
-    const html = `
-    <div style="font-family: sans-serif; max-width: 500px; margin: auto; padding: 20px;">
-        <h2 style="color: #2C3E2D;">Restablecer Contraseña</h2>
-        <p>Hola ${name}, haz clic en el botón de abajo para cambiar tu contraseña:</p>
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="background: #2C3E2D; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer ahora</a>
-        </div>
-        <p style="color: #9ab09e; font-size: 12px;">El enlace expira en 30 minutos.</p>
-    </div>`;
-
-    const mailOptions = {
-        from: FROM,
-        to,
-        subject: 'Restablece tu contraseña — Tu Selva Urbana',
-        html,
-    };
+    const apiKey = process.env['BREVO_SMTP_KEY'];
+    const fromEmail = process.env['BREVO_FROM_EMAIL'] || 'cesarenriquegaraygarcia50@gmail.com';
 
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Email de recuperación enviado a ${to}`);
-        return { success: true, messageId: info.messageId };
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey.trim(),
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { name: "Tu Selva Urbana 🌿", email: fromEmail },
+                to: [{ email: to, name: name }],
+                subject: `Restablecer Contraseña`,
+                htmlContent: `<p>Haz clic aquí para restablecer: <a href="${resetLink}">${resetLink}</a></p>`
+            })
+        });
+        return { success: response.ok };
     } catch (err) {
-        console.error(`❌ Error enviando email de recuperación:`, err.message);
         return { success: false, error: err.message };
     }
 }
