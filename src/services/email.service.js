@@ -11,13 +11,14 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_SMTP_KEY,
+        user: process.env['BREVO_USER'],
+        pass: process.env['BREVO_SMTP_KEY'],
     },
 });
 
 // El FROM debe ser un remitente verificado en Brevo (tu email real, no el login SMTP)
-const FROM_EMAIL = process.env.BREVO_FROM_EMAIL || process.env.BREVO_USER || 'noreply@tuselvaurbana.com';
+const env = process.env;
+const FROM_EMAIL = env['BREVO_FROM_EMAIL'] || env['BREVO_USER'] || 'noreply@tuselvaurbana.com';
 const FROM = `"Tu Selva Urbana 🌿" <${FROM_EMAIL}>`;
 
 /**

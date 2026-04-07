@@ -206,7 +206,8 @@ exports.forgotPassword = async (req, res) => {
             data: { resetToken: token, resetExpires: expires },
         });
 
-        const appUrl = process.env.APP_URL || 'https://tu-selva-urbana.up.railway.app';
+        const env = process.env;
+        const appUrl = env['APP_URL'] || 'https://tu-selva-urbana.up.railway.app';
         const resetLink = `${appUrl}/reset-password?token=${token}`;
 
         await sendPasswordResetEmail(email, user.name, resetLink);
