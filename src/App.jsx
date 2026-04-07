@@ -21,6 +21,9 @@ import MyAccount from './pages/MyAccount';
 import AddPlant from './pages/PlantForm';
 import PlantDetail from './pages/PlantDetail';
 
+// --- PÁGINA DE ADMINISTRACIÓN ---
+import AdminPanel from './pages/AdminPanel';
+
 /**
  * Componente para proteger rutas que requieren autenticación.
  * Redirige al login si el usuario no ha iniciado sesión.
@@ -44,7 +47,17 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/quiz" element={<Quiz />} />
 
-                {/* 2. RUTAS PROTEGIDAS (Envueltas en Layout) */}
+                {/* 2. RUTA DE ADMINISTRACIÓN (Protegida, pero sin el Layout estándar) */}
+                <Route 
+                    path="/admin" 
+                    element={
+                        <ProtectedRoute>
+                            <AdminPanel />
+                        </ProtectedRoute>
+                    } 
+                />
+
+                {/* 3. RUTAS PROTEGIDAS (Envueltas en el Layout de usuario) */}
                 <Route 
                     element={
                         <ProtectedRoute>
@@ -60,14 +73,11 @@ function App() {
                     <Route path="/mi-cuenta" element={<MyAccount />} />
 
                     {/* --- FLUJO DE VENTA Y VISUALIZACIÓN --- */}
-                    {/* Ruta para el formulario de agregar planta */}
                     <Route path="/vender" element={<AddPlant />} />
-                    
-                    {/* Ruta para visualizar el producto después de agregarlo */}
                     <Route path="/detalle-planta" element={<PlantDetail />} />
                 </Route>
 
-                {/* 3. FALLBACK (Redirección por defecto) */}
+                {/* 4. FALLBACK (Redirección por defecto) */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>
