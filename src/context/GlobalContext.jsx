@@ -36,11 +36,18 @@ export const GlobalProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, password) => {
+    const register = async (name, email, password, phone) => {
         try {
-            const data = await authAPI.register(name, email, password);
-            localStorage.setItem('tsu_token', data.token);
-            setUser(data.user);
+            const data = await authAPI.register(name, email, password, phone);
+            // Si el backend pide verificación, no logueamos aún
+            if (data.requiresVerification) {
+                return { success: true, requiresVerification: true, email };
+            }
+            // En caso de que no requiera verificación (legado)
+            if (data.token) {
+                localStorage.setItem('tsu_token', data.token);
+                setUser(data.user);
+            }
             return { success: true };
         } catch (err) {
             return { success: false, error: err.message };

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Heart, MessageCircle, Settings, Camera, PlusCircle, Sparkles, LogOut, Package } from 'lucide-react';
 import EditProfileModal from '../components/EditProfileModal';
 import OrderTracker from '../components/OrderTracker';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { useNavigate } from 'react-router-dom';
 
 export default function MyAccount() {
@@ -36,6 +37,7 @@ export default function MyAccount() {
 
     return (
         <div className="pb-12 h-full flex flex-col relative w-full">
+            <Breadcrumbs />
             <header className="mb-10 flex flex-col md:flex-row md:justify-between md:items-end gap-6 bg-white/80 backdrop-blur-md p-8 rounded-[32px] border border-sage/20 shadow-sm">
                 <div className="flex items-center gap-6">
                     <div className="relative group">

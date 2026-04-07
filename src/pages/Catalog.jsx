@@ -4,6 +4,7 @@ import { ShoppingBag, Info, Filter, Sparkles } from 'lucide-react';
 import { GlobalContext } from '../context/GlobalContext';
 import CheckoutModal from '../components/CheckoutModal';
 import PlantDetailsModal from '../components/PlantDetailsModal';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function Catalog() {
     const { plantDatabase } = useContext(GlobalContext);
@@ -27,6 +28,7 @@ export default function Catalog() {
 
     return (
         <div className="w-full max-w-7xl mx-auto pb-24">
+            <Breadcrumbs currentPlant={infoPlant || selectedPlant} />
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}

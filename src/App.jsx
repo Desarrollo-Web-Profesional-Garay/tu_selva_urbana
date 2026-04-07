@@ -1,7 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useContext } from 'react';
 import { GlobalContext } from './context/GlobalContext';
 import Layout from './components/Layout';
+import Footer from './components/Footer';
+import QuizNudge from './components/QuizNudge';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Feed from './pages/Feed';
@@ -10,12 +12,24 @@ import Recommendations from './pages/Recommendations';
 import MyPlants from './pages/MyPlants';
 import MyAccount from './pages/MyAccount';
 import Catalog from './pages/Catalog';
+import NotFound from './pages/NotFound';
+import ResetPassword from './pages/ResetPassword';
 
 // Wrapper que protege rutas internas
 function ProtectedRoute({ children }) {
     const { isAuthenticated } = useContext(GlobalContext);
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     return children;
+}
+
+// Layout interno con Footer y QuizNudge
+function InnerLayout() {
+    return (
+        <>
+            <Layout />
+            <QuizNudge />
+        </>
+    );
 }
 
 function App() {
@@ -25,11 +39,18 @@ function App() {
                 {/* Landing Page pública */}
                 <Route path="/" element={<LandingPage />} />
 
-                {/* Login / Registro */}
+                {/* Login / Registro / Verificación */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Login />} />
 
-                {/* Rutas protegidas con el layout principal */}
-                <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                {/* Recuperación de contraseña */}
+                <Route path="/reset-password" element={<ResetPassword />} />
+
+                {/* Quiz (accesible sin auth para flujo de landing) */}
+                <Route path="/quiz" element={<Quiz />} />
+
+                {/* Rutas protegidas con layout principal */}
+                <Route element={<ProtectedRoute><InnerLayout /></ProtectedRoute>}>
                     <Route path="/feed" element={<Feed />} />
                     <Route path="/recomendaciones" element={<Recommendations />} />
                     <Route path="/catalogo" element={<Catalog />} />
@@ -37,11 +58,8 @@ function App() {
                     <Route path="/mi-cuenta" element={<MyAccount />} />
                 </Route>
 
-                {/* Quiz inmersivo (accesible sin auth para el flujo de la Landing) */}
-                <Route path="/quiz" element={<Quiz />} />
-
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* 404 — NO redirige, mantiene la sesión */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
     );

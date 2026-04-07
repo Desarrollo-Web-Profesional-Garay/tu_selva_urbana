@@ -7,6 +7,7 @@ import CreatePostModal from './CreatePostModal';
 import ScannerModal from './ScannerModal';
 import { ScanLine } from 'lucide-react';
 import Chatbot from './Chatbot';
+import Footer from './Footer';
 
 export default function Layout() {
     const navItems = [
@@ -119,11 +120,12 @@ export default function Layout() {
 
             </aside>
 
-            {/* Main Content Area - Expansivo y sin restricciones de ancho */}
+            {/* Main Content Area */}
             <main className="flex-1 relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar bg-bone/50">
                 <div className="w-full max-w-[1600px] mx-auto px-6 py-8 md:px-12 lg:px-20 lg:py-16 min-h-full">
                     <Outlet />
                 </div>
+                <Footer />
             </main>
 
             {/* Mobile Bottom Nav (Fallback solo para celulares) */}
