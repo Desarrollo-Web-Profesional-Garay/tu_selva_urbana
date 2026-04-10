@@ -7,7 +7,7 @@ const plantsRoutes = require('./routes/plants.routes');
 const postsRoutes = require('./routes/posts.routes');
 const ordersRoutes = require('./routes/orders.routes');
 const usersRoutes = require('./routes/users.routes');
-const adminRoutes = require('./routes/admin.routes'); // <-- Importada la nueva ruta
+const adminRoutes = require('./routes/adminRoutes'); // <-- Importada la nueva ruta
 
 const app = express();
 const PORT = process.env.PORT || 3001;

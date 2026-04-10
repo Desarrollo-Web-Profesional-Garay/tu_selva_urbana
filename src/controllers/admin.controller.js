@@ -1,6 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+// ==========================================
+// GESTIÓN DE PEDIDOS (ORDERS)
+// ==========================================
+
 // Obtener todos los pedidos de todos los usuarios
 const getAllOrders = async (req, res) => {
     try {
@@ -53,9 +57,11 @@ const updateOrderStatus = async (req, res) => {
         console.error("Error al actualizar pedido:", error);
         res.status(500).json({ error: "Error al actualizar el estado del pedido." });
     }
-    
 };
-// --- Gestión de Usuarios ---
+
+// ==========================================
+// GESTIÓN DE USUARIOS (USERS)
+// ==========================================
 
 // Listar todos los usuarios (sin el password)
 const getAllUsers = async (req, res) => {
@@ -114,7 +120,10 @@ const updateUserRole = async (req, res) => {
         res.status(500).json({ error: "Error al actualizar el rol del usuario." });
     }
 };
-// --- Gestión de Plantas del Catálogo ---
+
+// ==========================================
+// GESTIÓN DE PLANTAS (CATÁLOGO)
+// ==========================================
 
 // Crear una nueva planta
 const createPlant = async (req, res) => {
@@ -124,10 +133,10 @@ const createPlant = async (req, res) => {
         const newPlant = await prisma.plant.create({
             data: {
                 name,
-                slug: slug || name.toLowerCase().replace(/ /g, '-'), // Genera slug si no hay
+                slug: slug || name.toLowerCase().replace(/ /g, '-'),
                 price: parseFloat(price) || 0,
                 careLevel: careLevel || "normal",
-                light: light || [], // Espera un arreglo como ["Poca", "Media"]
+                light: light || [],
                 petSafe: petSafe || false,
                 imageUrl,
                 tag
@@ -149,7 +158,6 @@ const updatePlant = async (req, res) => {
     const data = req.body;
 
     try {
-        // Convertimos el precio a float si viene en el body
         if (data.price) data.price = parseFloat(data.price);
 
         const updatedPlant = await prisma.plant.update({
@@ -177,11 +185,12 @@ const deletePlant = async (req, res) => {
     }
 };
 
-// --- Estadísticas del Dashboard ---
+// ==========================================
+// DASHBOARD & ESTADÍSTICAS
+// ==========================================
 
 const getDashboardStats = async (req, res) => {
     try {
-        // Ejecutamos múltiples consultas en una sola transacción para mejor rendimiento
         const [
             totalUsers,
             totalOrders,
@@ -197,7 +206,7 @@ const getDashboardStats = async (req, res) => {
             prisma.post.count(),
             prisma.order.aggregate({
                 _sum: { total: true },
-                where: { status: { not: 'cancelado' } } // Solo sumamos pedidos no cancelados
+                where: { status: { not: 'cancelado' } }
             })
         ]);
 
@@ -215,6 +224,10 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+// ==========================================
+// EXPORTACIÓN
+// ==========================================
+
 module.exports = {
     getAllOrders,
     updateOrderStatus,
@@ -224,5 +237,5 @@ module.exports = {
     createPlant,
     updatePlant,
     deletePlant,
-    getDashboardStats // <-- El último ingrediente
+    getDashboardStats
 };
