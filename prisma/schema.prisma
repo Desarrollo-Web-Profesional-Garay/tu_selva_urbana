@@ -7,22 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 1. Definición del Enum para Roles
+enum Role {
+  user
+  admin
+}
+
 model User {
-  id             Int         @id @default(autoincrement())
-  name           String
-  email          String      @unique
-  password       String
-  avatar         String?
-  phone          String?
-  emailVerified  Boolean     @default(true)
-  resetToken     String?
-  resetExpires   DateTime?
-  createdAt      DateTime    @default(now())
-  posts          Post[]
-  orders         Order[]
-  plants         UserPlant[]
-  likedPosts     Post[]      @relation("UserLikes")
-  comments       Comment[]
+  id            Int         @id @default(autoincrement())
+  name          String
+  email         String      @unique
+  password      String
+  avatar        String?
+  phone         String?
+  
+  // 2. Campo role agregado con valor por defecto "user"
+  role          Role        @default(user)
+  
+  emailVerified Boolean     @default(true)
+  resetToken    String?
+  resetExpires  DateTime?
+  createdAt     DateTime    @default(now())
+  posts         Post[]
+  orders        Order[]
+  plants        UserPlant[]
+  likedPosts    Post[]      @relation("UserLikes")
+  comments      Comment[]
 }
 
 model PendingRegistration {
@@ -37,23 +47,23 @@ model PendingRegistration {
 }
 
 model Plant {
-  id        Int         @id @default(autoincrement())
-  slug      String      @unique
-  name      String
-  modelUrl  String?
-  imageUrl  String?
-  light     String[]    // ["Poca", "Media", "Sol"]
-  petSafe   Boolean     @default(false)
-  careLevel String      @default("normal") // "facil", "normal", "experto"
-  tag       String?
-  price     Float       @default(0)
+  id           Int         @id @default(autoincrement())
+  slug         String      @unique
+  name         String
+  modelUrl     String?
+  imageUrl     String?
+  light        String[]    // ["Poca", "Media", "Sol"]
+  petSafe      Boolean     @default(false)
+  careLevel    String      @default("normal") // "facil", "normal", "experto"
+  tag          String?
+  price        Float       @default(0)
   careWater    String?
   careLight    String?
   careHumidity String?
-  createdAt DateTime    @default(now())
-  users     UserPlant[]
-  posts     Post[]
-  orderItems OrderItem[]
+  createdAt    DateTime    @default(now())
+  users        UserPlant[]
+  posts        Post[]
+  orderItems   OrderItem[]
 }
 
 model UserPlant {
@@ -92,15 +102,15 @@ model Comment {
 }
 
 model Order {
-  id        Int         @id @default(autoincrement())
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  total     Float
-  status    String      @default("pendiente") // pendiente, pagado, enviado, entregado
-  address   String?
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+  total         Float
+  status        String      @default("pendiente") // pendiente, pagado, enviado, entregado
+  address       String?
   paymentMethod String?
-  items     OrderItem[]
-  createdAt DateTime    @default(now())
+  items         OrderItem[]
+  createdAt     DateTime    @default(now())
 }
 
 model OrderItem {
