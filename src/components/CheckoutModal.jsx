@@ -449,7 +449,7 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                                                     {loading ? (
                                                         <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Procesando...</span>
                                                     ) : (
-                                                        <><CheckCircle2 size={18} /> Pagar ${price} MXN</>
+                                                        <><CheckCircle2 size={18} /> Pagar ${displayTotal} MXN</>
                                                     )}
                                                 </button>
                                             </form>
@@ -462,7 +462,7 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                                                         Serás redirigido a PayPal para completar tu pago de manera segura
                                                     </p>
                                                     <p className="text-xs text-center text-[#003087]/60 mt-1">
-                                                        Total: ${price} MXN
+                                                        Total: ${displayTotal} MXN
                                                     </p>
                                                 </div>
 
