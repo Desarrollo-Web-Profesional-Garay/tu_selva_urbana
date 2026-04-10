@@ -231,7 +231,7 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
         onClose();
     };
 
-    const price = plant.price?.toFixed(2) || '25.00';
+    const displayTotal = orderTotal.toFixed(2);
 
     return (
         <AnimatePresence>
@@ -260,25 +260,27 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                         {step < 3 && (
                             <div className="bg-white/50 border-r border-sage/20 p-8 flex flex-col items-center justify-center md:w-5/12 hidden md:flex flex-shrink-0">
                                 <div className="w-44 h-44 rounded-full bg-gradient-to-t from-bone to-sage/20 flex items-center justify-center mb-5 border-4 border-white shadow-lg overflow-hidden">
-                                    {plant.modelUrl ? (
+                                    {displayPlant.modelUrl ? (
                                         <model-viewer
-                                            src={plant.modelUrl}
+                                            src={displayPlant.modelUrl}
                                             auto-rotate
                                             camera-controls={false}
                                             interaction-prompt="none"
                                             style={{ width: '150%', height: '150%' }}
                                         />
                                     ) : (
-                                        <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+                                        <img src={displayPlant.imageUrl} alt={displayPlant.name} className="w-full h-full object-cover" />
                                     )}
                                 </div>
-                                <h3 className="text-xl font-bold text-forest text-center mb-1">{plant.name}</h3>
-                                <p className="text-forest/60 text-sm mb-5">{plant.tag || 'Planta de interior'}</p>
+                                <h3 className="text-xl font-bold text-forest text-center mb-1">
+                                    {cartItems && cartItems.length > 1 ? `${displayPlant.name} y más...` : displayPlant.name}
+                                </h3>
+                                <p className="text-forest/60 text-sm mb-5">{displayPlant.tag || 'Planta de interior'}</p>
 
                                 <div className="w-full bg-white rounded-2xl p-4 shadow-sm border border-sage/10 space-y-2">
                                     <div className="flex justify-between text-sm text-forest">
                                         <span>Subtotal</span>
-                                        <span className="font-bold">${price} MXN</span>
+                                        <span className="font-bold">${displayTotal} MXN</span>
                                     </div>
                                     <div className="flex justify-between text-sm text-forest">
                                         <span>Envío</span>
@@ -286,7 +288,7 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                                     </div>
                                     <div className="border-t border-sage/20 pt-2 flex justify-between font-bold text-forest text-lg">
                                         <span>Total</span>
-                                        <span>${price} MXN</span>
+                                        <span>${displayTotal} MXN</span>
                                     </div>
                                 </div>
 
@@ -475,10 +477,10 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                                                             return actions.order.create({
                                                                 purchase_units: [{
                                                                     amount: {
-                                                                        value: plant.price?.toFixed(2) || '25.00',
+                                                                        value: displayTotal,
                                                                         currency_code: 'MXN',
                                                                     },
-                                                                    description: `Tu Selva Urbana: ${plant.name}`,
+                                                                    description: `Tu Selva Urbana: ${cartItems && cartItems.length > 1 ? 'Pedido Múltiple' : displayPlant.name}`,
                                                                 }],
                                                             });
                                                         }}
@@ -531,8 +533,11 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                                             transition={{ delay: 0.4 }}
                                             className="text-forest/70 max-w-sm mb-6"
                                         >
-                                            Tu <strong>{plant.name}</strong> está siendo preparada con cuidado en nuestro vivero.
-                                            Con amor, estará en tu hogar pronto. 🚚
+                                            {cartItems && cartItems.length > 1 ? (
+                                                <>Tus plantas están siendo preparadas con cuidado en nuestro vivero.<br/>Con amor, estarán en tu hogar pronto. 🚚</>
+                                            ) : (
+                                                <>Tu <strong>{displayPlant.name}</strong> está siendo preparada con cuidado en nuestro vivero.<br/>Con amor, estará en tu hogar pronto. 🚚</>
+                                            )}
                                         </motion.p>
 
                                         {/* Resumen de orden */}
@@ -543,28 +548,21 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initi
                                             className="w-full max-w-sm bg-white/80 rounded-2xl border border-sage/20 p-4 mb-5 text-left shadow-sm"
                                         >
                                             <div className="flex items-center gap-3 mb-3 pb-3 border-b border-sage/10">
-                                                <img src={plant.imageUrl} alt={plant.name} className="w-12 h-12 rounded-xl object-cover border border-sage/20" />
+                                                <img src={displayPlant.imageUrl} alt={displayPlant.name} className="w-12 h-12 rounded-xl object-cover border border-sage/20" />
                                                 <div>
-                                                    <div className="font-bold text-forest text-sm">{plant.name}</div>
-                                                    <div className="text-xs text-forest/50">Cantidad: 1</div>
-                                                </div>
-                                                <span className="ml-auto font-black text-forest">${price}</span>
-                                            </div>
-                                            <div className="text-xs text-forest/60 space-y-1">
-                                                <div className="flex justify-between">
-                                                    <span>Método de pago</span>
-                                                    <span className="font-bold capitalize">{paymentMethod === 'paypal' ? '🟡 PayPal' : '💳 Tarjeta'}</span>
-                                                </div>
-                                                {fullAddress && (
-                                                    <div className="flex justify-between gap-4">
-                                                        <span>Envío a</span>
-                                                        <span className="font-bold text-right">{fullAddress}</span>
+                                                    <div className="font-bold text-forest text-sm">
+                                                        {cartItems && cartItems.length > 1 ? 'Pedido Múltiple' : displayPlant.name}
                                                     </div>
-                                                )}
-                                                <div className="flex justify-between">
-                                                    <span>Tiempo estimado</span>
-                                                    <span className="font-bold text-sage">2-3 días hábiles</span>
+                                                    <div className="text-xs text-forest/50">Envío Estándar</div>
                                                 </div>
+                                            </div>
+                                            <div className="flex justify-between text-forest/70 text-sm mb-1">
+                                                <span>Total Pagado</span>
+                                                <span className="font-bold text-forest">${displayTotal} MXN</span>
+                                            </div>
+                                            <div className="flex justify-between text-forest/70 text-sm">
+                                                <span>Método</span>
+                                                <span className="capitalize">{paymentMethod}</span>
                                             </div>
                                         </motion.div>
 
