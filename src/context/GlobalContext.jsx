@@ -158,53 +158,74 @@ export const GlobalProvider = ({ children }) => {
     };
 
     // ========== CARRITO ==========
+    // Normalizar un plant para que siempre tenga price como número
+    const normalizePlant = (plant) => ({
+        ...plant,
+        price: parseFloat(plant?.price) || 0,
+    });
+
+    // Validar que un item del carrito tenga estructura correcta
+    const isValidItem = (item) =>
+        item &&
+        typeof item === 'object' &&
+        item.plant &&
+        typeof item.plant === 'object' &&
+        item.plant.id !== undefined &&
+        !isNaN(parseFloat(item.plant.price)) &&
+        typeof item.quantity === 'number';
+
     const [cart, setCart] = useState(() => {
         try {
             const saved = localStorage.getItem('tsu_cart');
-            return saved ? JSON.parse(saved) : [];
-        } catch { return []; }
+            if (!saved) return [];
+            const parsed = JSON.parse(saved);
+            if (!Array.isArray(parsed)) { localStorage.removeItem('tsu_cart'); return []; }
+            // Normalizar y limpiar desde el inicio
+            const valid = parsed
+                .filter(isValidItem)
+                .map(item => ({ ...item, plant: normalizePlant(item.plant) }));
+            return valid;
+        } catch { localStorage.removeItem('tsu_cart'); return []; }
     });
     const [isCartOpen, setIsCartOpen] = useState(false);
 
-    // Sincronizar carrito con localStorage
     useEffect(() => {
         localStorage.setItem('tsu_cart', JSON.stringify(cart));
     }, [cart]);
 
     const addToCart = (plant, qty = 1) => {
+        const safePlant = normalizePlant(plant);
         setCart(prev => {
-            // Limpiar items corruptos antes de operar
-            const clean = prev.filter(item => item?.plant?.id !== undefined && item?.plant?.price !== undefined);
-            const existing = clean.find(item => item.plant.id === plant.id);
+            const clean = prev.filter(isValidItem);
+            const existing = clean.find(item => item.plant.id === safePlant.id);
             if (existing) {
                 return clean.map(item =>
-                    item.plant.id === plant.id
+                    item.plant.id === safePlant.id
                         ? { ...item, quantity: item.quantity + qty }
                         : item
                 );
             }
-            return [...clean, { plant, quantity: qty }];
+            return [...clean, { plant: safePlant, quantity: qty }];
         });
         setIsCartOpen(true);
     };
 
     const removeFromCart = (plantId) => {
-        setCart(prev => prev.filter(item => item.plant.id !== plantId));
+        setCart(prev => prev.filter(item => item?.plant?.id !== plantId));
     };
 
     const updateQty = (plantId, qty) => {
         if (qty <= 0) { removeFromCart(plantId); return; }
         setCart(prev => prev.map(item =>
-            item.plant.id === plantId ? { ...item, quantity: qty } : item
-        ));
+            item?.plant?.id === plantId ? { ...item, quantity: qty } : item
+        ).filter(isValidItem));
     };
 
     const clearCart = () => setCart([]);
 
-    // Filtrar items corruptos (por si hay datos viejos en localStorage)
-    const safeCart = cart.filter(item => item?.plant?.price !== undefined);
-    const cartCount = safeCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-    const cartTotal = safeCart.reduce((sum, item) => sum + (item.plant.price * (item.quantity || 1)), 0);
+    const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const cartTotal = cart.reduce((sum, item) => sum + (parseFloat(item.plant?.price) || 0) * (item.quantity || 1), 0);
+
 
     return (
         <GlobalContext.Provider value={{
@@ -213,7 +234,7 @@ export const GlobalProvider = ({ children }) => {
             myPlants, adoptPlant,
             recommendations, quizAnswers, handleDiagnostic,
             plantDatabase,
-            cart: safeCart, addToCart, removeFromCart, updateQty, clearCart,
+            cart, addToCart, removeFromCart, updateQty, clearCart,
             cartCount, cartTotal, isCartOpen, setIsCartOpen,
         }}>
             {children}

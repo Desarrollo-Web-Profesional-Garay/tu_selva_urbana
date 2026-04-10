@@ -93,7 +93,9 @@ export default function CartDrawer() {
                                 <>
                                     {/* Lista de items */}
                                     <AnimatePresence initial={false}>
-                                        {cart.map((item) => (
+                                        {cart.filter(item => item?.plant?.id).map((item) => {
+                                            const price = parseFloat(item.plant?.price) || 0;
+                                            return (
                                             <motion.div
                                                 key={item.plant.id}
                                                 layout
@@ -115,7 +117,7 @@ export default function CartDrawer() {
                                                 {/* Info */}
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-bold text-forest text-sm truncate">{item.plant.name}</p>
-                                                    <p className="text-forest/50 text-xs mb-2">${item.plant.price.toFixed(2)} MXN c/u</p>
+                                                    <p className="text-forest/50 text-xs mb-2">${price.toFixed(2)} MXN c/u</p>
 
                                                     {/* Control de cantidad */}
                                                     <div className="flex items-center gap-2">
@@ -142,7 +144,7 @@ export default function CartDrawer() {
                                                 {/* Precio total del item + quitar */}
                                                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
                                                     <p className="font-black text-forest text-sm">
-                                                        ${(item.plant.price * item.quantity).toFixed(2)}
+                                                        ${(price * item.quantity).toFixed(2)}
                                                     </p>
                                                     <motion.button
                                                         whileTap={{ scale: 0.9 }}
@@ -153,7 +155,8 @@ export default function CartDrawer() {
                                                     </motion.button>
                                                 </div>
                                             </motion.div>
-                                        ))}
+                                            );
+                                        })}
                                     </AnimatePresence>
 
                                     {/* Botón limpiar carrito */}
