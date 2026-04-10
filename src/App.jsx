@@ -4,7 +4,7 @@ import { GlobalContext } from './context/GlobalContext';
 
 // Componentes de Estructura y Protección
 import Layout from './components/Layout';
-import AdminRoute from './components/AdminRoute'; // Asegúrate de haber creado este archivo
+import AdminRoute from './components/AdminRoute'; 
 
 // Páginas Públicas
 import LandingPage from './pages/LandingPage';
@@ -22,8 +22,9 @@ import MyAccount from './pages/MyAccount';
 import AddPlant from './pages/PlantForm';
 import PlantDetail from './pages/PlantDetail';
 
-// --- PÁGINA DE ADMINISTRACIÓN ---
+// --- PÁGINAS DE ADMINISTRACIÓN ---
 import AdminPanel from './pages/AdminPanel';
+import UsersTable from './pages/UsersTable'; // Importamos la nueva tabla de usuarios
 
 /**
  * Componente para proteger rutas que requieren autenticación general.
@@ -48,13 +49,21 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/quiz" element={<Quiz />} />
 
-                {/* 2. RUTA DE ADMINISTRACIÓN (Protegida por Rol Admin) */}
-                {/* Si no es admin, AdminRoute lo mandará automáticamente a /feed */}
+                {/* 2. RUTAS DE ADMINISTRACIÓN (Protegidas por Rol Admin) */}
+                {/* Se agrupan bajo AdminRoute para mayor seguridad */}
                 <Route 
                     path="/admin" 
                     element={
                         <AdminRoute>
                             <AdminPanel />
+                        </AdminRoute>
+                    } 
+                />
+                <Route 
+                    path="/admin/usuarios" 
+                    element={
+                        <AdminRoute>
+                            <UsersTable />
                         </AdminRoute>
                     } 
                 />
