@@ -276,7 +276,7 @@ export default function MyAccount() {
                                     <motion.button 
                                         whileHover={{ scale: 1.05 }} 
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => navigate('/catalog')}
+                                        onClick={() => navigate('/catalogo')}
                                         className="bg-forest text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-forest/20 flex items-center gap-2"
                                     >
                                         <Package size={18} /> Ver Catálogo

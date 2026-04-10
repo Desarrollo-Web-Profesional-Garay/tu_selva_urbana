@@ -1,13 +1,13 @@
 import { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Info, Filter, Sparkles } from 'lucide-react';
+import { ShoppingBag, Info, Filter, Sparkles, ShoppingCart, Plus } from 'lucide-react';
 import { GlobalContext } from '../context/GlobalContext';
 import CheckoutModal from '../components/CheckoutModal';
 import PlantDetailsModal from '../components/PlantDetailsModal';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function Catalog() {
-    const { plantDatabase } = useContext(GlobalContext);
+    const { plantDatabase, addToCart } = useContext(GlobalContext);
     const [selectedPlant, setSelectedPlant] = useState(null);
     const [infoPlant, setInfoPlant] = useState(null);
     const [activeFilter, setActiveFilter] = useState('todas'); // 'todas', 'facil', 'normal', 'experto', 'pet'
@@ -96,24 +96,33 @@ export default function Catalog() {
                         </div>
 
                         {/* Details */}
-                        <div className="p-6 flex flex-col flex-1">
+                        <div className="p-5 flex flex-col flex-1">
                             <h3 className="text-xl font-black text-forest mb-1 leading-tight">{plant.name}</h3>
-                            <div className="flex flex-wrap justify-between items-center gap-3 mt-auto pt-4 border-t border-sage/10">
-                                <div>
-                                    <p className="text-xs font-bold text-forest/50 uppercase tracking-wider mb-1">
-                                        Nivel: {plant.careLevel}
-                                    </p>
-                                    <p className="text-lg font-black text-forest">
-                                        ${plant.price.toFixed(2)}
-                                    </p>
+                            <p className="text-xs font-bold text-forest/40 uppercase tracking-wider mb-3">
+                                Nivel: {plant.careLevel}
+                            </p>
+                            <div className="mt-auto pt-4 border-t border-sage/10">
+                                <p className="text-xl font-black text-forest mb-3">${plant.price.toFixed(2)}</p>
+                                <div className="flex gap-2">
+                                    {/* Al Carrito */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => addToCart(plant, 1)}
+                                        className="flex-1 bg-bone border border-sage/30 text-forest px-3 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage/10 transition-all text-sm"
+                                    >
+                                        <ShoppingCart size={15} /> Carrito
+                                    </motion.button>
+                                    {/* Comprar ahora */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setSelectedPlant(plant)}
+                                        className="flex-1 bg-forest text-white px-3 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage transition-all shadow-md shadow-forest/20 text-sm"
+                                    >
+                                        <ShoppingBag size={15} /> Adoptar
+                                    </motion.button>
                                 </div>
-
-                                <button
-                                    onClick={() => setSelectedPlant(plant)}
-                                    className="bg-forest text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-sage transition-all hover:scale-105 shadow-md shadow-forest/20 text-sm whitespace-nowrap"
-                                >
-                                    <ShoppingBag size={16} /> Adoptar
-                                </button>
                             </div>
                         </div>
                     </motion.div>

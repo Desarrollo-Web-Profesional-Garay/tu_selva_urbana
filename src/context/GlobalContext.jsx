@@ -157,6 +157,51 @@ export const GlobalProvider = ({ children }) => {
         }
     };
 
+    // ========== CARRITO ==========
+    const [cart, setCart] = useState(() => {
+        try {
+            const saved = localStorage.getItem('tsu_cart');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    });
+    const [isCartOpen, setIsCartOpen] = useState(false);
+
+    // Sincronizar carrito con localStorage
+    useEffect(() => {
+        localStorage.setItem('tsu_cart', JSON.stringify(cart));
+    }, [cart]);
+
+    const addToCart = (plant, qty = 1) => {
+        setCart(prev => {
+            const existing = prev.find(item => item.plant.id === plant.id);
+            if (existing) {
+                return prev.map(item =>
+                    item.plant.id === plant.id
+                        ? { ...item, quantity: item.quantity + qty }
+                        : item
+                );
+            }
+            return [...prev, { plant, quantity: qty }];
+        });
+        setIsCartOpen(true); // Abrir carrito al agregar
+    };
+
+    const removeFromCart = (plantId) => {
+        setCart(prev => prev.filter(item => item.plant.id !== plantId));
+    };
+
+    const updateQty = (plantId, qty) => {
+        if (qty <= 0) { removeFromCart(plantId); return; }
+        setCart(prev => prev.map(item =>
+            item.plant.id === plantId ? { ...item, quantity: qty } : item
+        ));
+    };
+
+    const clearCart = () => setCart([]);
+
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartTotal = cart.reduce((sum, item) => sum + item.plant.price * item.quantity, 0);
+
     return (
         <GlobalContext.Provider value={{
             user, isAuthenticated, login, register, logout, updateProfile,
@@ -164,6 +209,8 @@ export const GlobalProvider = ({ children }) => {
             myPlants, adoptPlant,
             recommendations, quizAnswers, handleDiagnostic,
             plantDatabase,
+            cart, addToCart, removeFromCart, updateQty, clearCart,
+            cartCount, cartTotal, isCartOpen, setIsCartOpen,
         }}>
             {children}
         </GlobalContext.Provider>

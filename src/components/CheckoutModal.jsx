@@ -168,8 +168,8 @@ function useSuccessSound() {
     return { playSound };
 }
 
-export default function CheckoutModal({ isOpen, onClose, plant }) {
-    const { adoptPlant } = useContext(GlobalContext);
+export default function CheckoutModal({ isOpen, onClose, plant, cartItems }) {
+    const { adoptPlant, clearCart } = useContext(GlobalContext);
     const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -186,16 +186,26 @@ export default function CheckoutModal({ isOpen, onClose, plant }) {
 
     const fullAddress = [addressStreet, addressCity, addressZip].filter(Boolean).join(', ');
 
-    if (!plant) return null;
+    // Construir lista de items según si viene una planta sola o el carrito completo
+    const orderItems = cartItems && cartItems.length > 0
+        ? cartItems.map(item => ({ plantId: item.plant.id, quantity: item.quantity, price: item.plant.price }))
+        : plant ? [{ plantId: plant.id, quantity: 1, price: plant.price || 25 }] : [];
+
+    const orderTotal = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    const displayPlant = plant || (cartItems && cartItems.length > 0 ? cartItems[0].plant : null);
+
+    if (!displayPlant && (!cartItems || cartItems.length === 0)) return null;
 
     const procesarOrden = async (method) => {
         try {
-            await ordersAPI.create(
-                [{ plantId: plant.id, quantity: 1, price: plant.price || 25 }],
-                fullAddress,
-                method
-            );
-            await adoptPlant(plant);
+            await ordersAPI.create(orderItems, fullAddress, method);
+            // Adoptar cada planta del carrito
+            if (cartItems && cartItems.length > 0) {
+                for (const item of cartItems) await adoptPlant(item.plant);
+                clearCart();
+            } else if (plant) {
+                await adoptPlant(plant);
+            }
             playSound();
             setStep(3);
         } catch (err) {

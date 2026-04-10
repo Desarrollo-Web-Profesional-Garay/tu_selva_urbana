@@ -1,11 +1,11 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Sparkles, Leaf, Compass, PlusCircle, LogOut, Library, Star } from 'lucide-react';
+import { Home, Sparkles, Leaf, Compass, PlusCircle, LogOut, Library, ShoppingCart, ScanLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
 import CreatePostModal from './CreatePostModal';
 import ScannerModal from './ScannerModal';
-import { ScanLine } from 'lucide-react';
+import CartDrawer from './CartDrawer';
 import Chatbot from './Chatbot';
 import Footer from './Footer';
 
@@ -18,7 +18,7 @@ export default function Layout() {
     ];
 
     const navigate = useNavigate();
-    const { user, logout } = useContext(GlobalContext);
+    const { user, logout, cartCount, setIsCartOpen } = useContext(GlobalContext);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
 
@@ -76,6 +76,24 @@ export default function Layout() {
 
                     {/* User Profile & Post Action */}
                     <div className="px-6 pb-6 pt-4 flex flex-col gap-4 border-t border-sage/10 shrink-0">
+                        {/* Botón Carrito */}
+                        <button
+                            onClick={() => setIsCartOpen(true)}
+                            className="w-full bg-bone border border-sage/30 text-forest font-bold py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-sage/10 transition-all relative"
+                        >
+                            <ShoppingCart size={18} /> Mi Carrito
+                            {cartCount > 0 && (
+                                <motion.span
+                                    key={cartCount}
+                                    initial={{ scale: 0.5 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-terra text-white rounded-full text-[10px] font-black flex items-center justify-center"
+                                >
+                                    {cartCount}
+                                </motion.span>
+                            )}
+                        </button>
+
                         <button
                             onClick={() => setIsScannerOpen(true)}
                             className="w-full bg-gradient-to-r from-sage to-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-sage/30 flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:scale-[1.02] active:scale-95 border border-white/20 relative overflow-hidden group"
@@ -179,7 +197,19 @@ export default function Layout() {
                 </div>
             </nav>
 
-            <nav className="lg:hidden fixed bottom-16 right-4 z-50">
+            <nav className="lg:hidden fixed bottom-16 right-4 z-50 flex flex-col gap-3">
+                {/* Botón carrito mobile */}
+                <button
+                    onClick={() => setIsCartOpen(true)}
+                    className="w-12 h-12 bg-white border border-sage/30 text-forest rounded-full flex items-center justify-center shadow-lg relative"
+                >
+                    <ShoppingCart size={20} />
+                    {cartCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-terra text-white rounded-full text-[10px] font-black flex items-center justify-center">
+                            {cartCount}
+                        </span>
+                    )}
+                </button>
                 <button
                     onClick={() => setIsScannerOpen(true)}
                     className="w-14 h-14 bg-gradient-to-r from-sage to-forest text-white rounded-full flex items-center justify-center shadow-lg shadow-sage/30 hover:scale-110 transition-transform"
@@ -190,6 +220,7 @@ export default function Layout() {
 
             <CreatePostModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
             <ScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
+            <CartDrawer />
             <Chatbot />
         </div>
     );
