@@ -56,4 +56,11 @@ router.put('/plants/:id', ctrl.updatePlant);
 // DELETE /api/admin/plants/:id
 router.delete('/plants/:id', ctrl.deletePlant);
 
+// ==========================================
+// DASHBOARD & ESTADÍSTICAS
+// ==========================================
+
+// GET /api/admin/stats
+router.get('/stats', ctrl.getDashboardStats);
+
 module.exports = router;

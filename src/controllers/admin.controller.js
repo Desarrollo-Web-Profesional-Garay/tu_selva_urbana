@@ -176,13 +176,53 @@ const deletePlant = async (req, res) => {
         res.status(500).json({ error: "Error al intentar eliminar la planta." });
     }
 };
+
+// --- Estadísticas del Dashboard ---
+
+const getDashboardStats = async (req, res) => {
+    try {
+        // Ejecutamos múltiples consultas en una sola transacción para mejor rendimiento
+        const [
+            totalUsers,
+            totalOrders,
+            pendingOrders,
+            totalPlants,
+            totalPosts,
+            revenueResult
+        ] = await prisma.$transaction([
+            prisma.user.count(),
+            prisma.order.count(),
+            prisma.order.count({ where: { status: 'pendiente' } }),
+            prisma.plant.count(),
+            prisma.post.count(),
+            prisma.order.aggregate({
+                _sum: { total: true },
+                where: { status: { not: 'cancelado' } } // Solo sumamos pedidos no cancelados
+            })
+        ]);
+
+        res.json({
+            totalUsers,
+            totalOrders,
+            pendingOrders,
+            totalRevenue: revenueResult._sum.total || 0,
+            totalPlants,
+            totalPosts
+        });
+    } catch (error) {
+        console.error("Error al calcular estadísticas:", error);
+        res.status(500).json({ error: "Error al generar el reporte de estadísticas." });
+    }
+};
+
 module.exports = {
     getAllOrders,
     updateOrderStatus,
     getAllUsers,
     deleteUser,
     updateUserRole,
-    createPlant,   // Nuevo
-    updatePlant,   // Nuevo
-    deletePlant    // Nuevo
+    createPlant,
+    updatePlant,
+    deletePlant,
+    getDashboardStats // <-- El último ingrediente
 };
