@@ -199,8 +199,10 @@ export const GlobalProvider = ({ children }) => {
 
     const clearCart = () => setCart([]);
 
-    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const cartTotal = cart.reduce((sum, item) => sum + item.plant.price * item.quantity, 0);
+    // Filtrar items corruptos (por si hay datos viejos en localStorage)
+    const safeCart = cart.filter(item => item?.plant?.price !== undefined);
+    const cartCount = safeCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const cartTotal = safeCart.reduce((sum, item) => sum + (item.plant.price * (item.quantity || 1)), 0);
 
     return (
         <GlobalContext.Provider value={{
@@ -209,7 +211,7 @@ export const GlobalProvider = ({ children }) => {
             myPlants, adoptPlant,
             recommendations, quizAnswers, handleDiagnostic,
             plantDatabase,
-            cart, addToCart, removeFromCart, updateQty, clearCart,
+            cart: safeCart, addToCart, removeFromCart, updateQty, clearCart,
             cartCount, cartTotal, isCartOpen, setIsCartOpen,
         }}>
             {children}

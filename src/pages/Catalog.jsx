@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Info, Filter, Sparkles, ShoppingCart, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Info, Filter, Sparkles, ShoppingCart, Plus, Minus, Check } from 'lucide-react';
 import { GlobalContext } from '../context/GlobalContext';
 import CheckoutModal from '../components/CheckoutModal';
 import PlantDetailsModal from '../components/PlantDetailsModal';
@@ -10,7 +10,11 @@ export default function Catalog() {
     const { plantDatabase, addToCart } = useContext(GlobalContext);
     const [selectedPlant, setSelectedPlant] = useState(null);
     const [infoPlant, setInfoPlant] = useState(null);
-    const [activeFilter, setActiveFilter] = useState('todas'); // 'todas', 'facil', 'normal', 'experto', 'pet'
+    const [activeFilter, setActiveFilter] = useState('todas');
+    // Mapa de { plantId: quantity } para el selector de cantidad
+    const [quantities, setQuantities] = useState({});
+    // Mapa de { plantId: true } para mostrar el check animado al agregar
+    const [added, setAdded] = useState({});
 
     const filters = [
         { id: 'todas', label: 'Todas las Plantas' },
@@ -25,6 +29,22 @@ export default function Catalog() {
         if (activeFilter === 'pet') return plant.petSafe;
         return plant.careLevel === activeFilter;
     });
+
+    const getQty = (id) => quantities[id] || 1;
+
+    const changeQty = (id, delta) => {
+        setQuantities(prev => ({
+            ...prev,
+            [id]: Math.max(1, Math.min(99, (prev[id] || 1) + delta))
+        }));
+    };
+
+    const handleAddToCart = (plant) => {
+        addToCart(plant, getQty(plant.id));
+        // Animación de confirmación
+        setAdded(prev => ({ ...prev, [plant.id]: true }));
+        setTimeout(() => setAdded(prev => ({ ...prev, [plant.id]: false })), 1800);
+    };
 
     return (
         <div className="w-full max-w-7xl mx-auto pb-24">
@@ -56,9 +76,9 @@ export default function Catalog() {
                         key={filter.id}
                         onClick={() => setActiveFilter(filter.id)}
                         className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeFilter === filter.id
-                                ? 'bg-forest text-white shadow-lg shadow-forest/20 scale-105'
-                                : 'bg-white text-forest/70 border border-sage/30 hover:bg-sage/10 hover:text-forest'
-                            }`}
+                            ? 'bg-forest text-white shadow-lg shadow-forest/20 scale-105'
+                            : 'bg-white text-forest/70 border border-sage/30 hover:bg-sage/10 hover:text-forest'
+                        }`}
                     >
                         {filter.label}
                     </button>
@@ -72,7 +92,7 @@ export default function Catalog() {
                         key={plant.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
+                        transition={{ delay: index * 0.04 }}
                         className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-sage/10 group flex flex-col"
                     >
                         {/* Image Box */}
@@ -83,10 +103,7 @@ export default function Catalog() {
                                     <span className="text-[10px] font-black tracking-wider text-forest uppercase">Pet Friendly</span>
                                 </div>
                             )}
-
-                            {/* Imagen de alta fiabilidad extraída de Wikipedia Commons */}
                             <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-
                             <button
                                 onClick={() => setInfoPlant(plant)}
                                 className="absolute bottom-5 right-5 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg text-forest/50 hover:text-forest hover:bg-white transition-all hover:scale-110 z-10"
@@ -97,30 +114,76 @@ export default function Catalog() {
 
                         {/* Details */}
                         <div className="p-5 flex flex-col flex-1">
-                            <h3 className="text-xl font-black text-forest mb-1 leading-tight">{plant.name}</h3>
+                            <h3 className="text-lg font-black text-forest mb-0.5 leading-tight">{plant.name}</h3>
                             <p className="text-xs font-bold text-forest/40 uppercase tracking-wider mb-3">
                                 Nivel: {plant.careLevel}
                             </p>
-                            <div className="mt-auto pt-4 border-t border-sage/10">
-                                <p className="text-xl font-black text-forest mb-3">${plant.price.toFixed(2)}</p>
-                                <div className="flex gap-2">
-                                    {/* Al Carrito */}
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => addToCart(plant, 1)}
-                                        className="flex-1 bg-bone border border-sage/30 text-forest px-3 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage/10 transition-all text-sm"
+
+                            <div className="mt-auto pt-4 border-t border-sage/10 space-y-3">
+                                <p className="text-xl font-black text-forest">${plant.price?.toFixed(2) ?? '—'}</p>
+
+                                {/* Selector de cantidad */}
+                                <div className="flex items-center gap-2 bg-bone rounded-xl px-3 py-1.5 w-fit">
+                                    <button
+                                        onClick={() => changeQty(plant.id, -1)}
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-forest/60 hover:bg-sage/20 hover:text-forest transition-colors"
                                     >
-                                        <ShoppingCart size={15} /> Carrito
+                                        <Minus size={12} />
+                                    </button>
+                                    <span className="w-6 text-center font-black text-forest text-sm">{getQty(plant.id)}</span>
+                                    <button
+                                        onClick={() => changeQty(plant.id, 1)}
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-forest/60 hover:bg-sage/20 hover:text-forest transition-colors"
+                                    >
+                                        <Plus size={12} />
+                                    </button>
+                                    <span className="text-xs text-forest/40 ml-1 font-medium">unid.</span>
+                                </div>
+
+                                {/* Botones */}
+                                <div className="flex gap-2">
+                                    {/* Agregar al carrito con feedback */}
+                                    <motion.button
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => handleAddToCart(plant)}
+                                        className={`flex-1 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all text-sm ${
+                                            added[plant.id]
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-bone border border-sage/30 text-forest hover:bg-sage/10'
+                                        }`}
+                                    >
+                                        <AnimatePresence mode="wait">
+                                            {added[plant.id] ? (
+                                                <motion.span
+                                                    key="check"
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    exit={{ scale: 0 }}
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    <Check size={14} /> ¡Listo!
+                                                </motion.span>
+                                            ) : (
+                                                <motion.span
+                                                    key="cart"
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="flex items-center gap-1.5"
+                                                >
+                                                    <ShoppingCart size={14} /> Carrito
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
                                     </motion.button>
+
                                     {/* Comprar ahora */}
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setSelectedPlant(plant)}
-                                        className="flex-1 bg-forest text-white px-3 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage transition-all shadow-md shadow-forest/20 text-sm"
+                                        className="flex-1 bg-forest text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage transition-all shadow-md shadow-forest/20 text-sm"
                                     >
-                                        <ShoppingBag size={15} /> Adoptar
+                                        <ShoppingBag size={14} /> Adoptar
                                     </motion.button>
                                 </div>
                             </div>
