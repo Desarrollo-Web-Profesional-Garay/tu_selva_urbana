@@ -1,17 +1,25 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Info, Filter, Sparkles, Loader2 } from 'lucide-react';
+import { useContext, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Info, Filter, Sparkles, ShoppingCart, Plus, Minus, Check, Loader2 } from 'lucide-react';
+import { GlobalContext } from '../context/GlobalContext';
 import { plantsAPI } from '../services/api';
 import CheckoutModal from '../components/CheckoutModal';
 import PlantDetailsModal from '../components/PlantDetailsModal';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function Catalog() {
+    // 1. Estados de tu rama (API)
     const [plants, setPlants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedPlant, setSelectedPlant] = useState(null);
+    
+    // 2. Estados de la rama Main (Carrito y UI)
+    const { addToCart } = useContext(GlobalContext);
+    const [selectedPlant, setSelectedPlant] = useState(null); 
     const [infoPlant, setInfoPlant] = useState(null);
     const [activeFilter, setActiveFilter] = useState('todas');
+    const [quantities, setQuantities] = useState({});
+    const [added, setAdded] = useState({});
 
     const filters = [
         { id: 'todas', label: 'Todas las Plantas' },
@@ -21,7 +29,7 @@ export default function Catalog() {
         { id: 'pet', label: 'Pet Friendly' },
     ];
 
-    // Cargar plantas cuando cambia el filtro
+    // Cargar plantas desde tu API
     useEffect(() => {
         loadPlants();
     }, [activeFilter]);
@@ -31,7 +39,6 @@ export default function Catalog() {
         setError(null);
         try {
             let data;
-            
             if (activeFilter === 'pet') {
                 data = await plantsAPI.getPetFriendly();
             } else if (activeFilter !== 'todas') {
@@ -39,7 +46,6 @@ export default function Catalog() {
             } else {
                 data = await plantsAPI.getAll();
             }
-            
             setPlants(data);
         } catch (err) {
             setError(err.message);
@@ -49,8 +55,20 @@ export default function Catalog() {
         }
     };
 
+    // Funciones del Carrito (Main)
+    const getQty = (id) => quantities[id] || 1;
+
+    const changeQty = (id, delta) => {
+        setQuantities(prev => ({
+            ...prev,
+            [id]: Math.max(1, Math.min(99, (prev[id] || 1) + delta))
+        }));
+    };
+
     const handleAddToCart = (plant) => {
-        setSelectedPlant(plant);
+        addToCart(plant, getQty(plant.id));
+        setAdded(prev => ({ ...prev, [plant.id]: true }));
+        setTimeout(() => setAdded(prev => ({ ...prev, [plant.id]: false })), 1800);
     };
 
     if (loading) {
@@ -77,6 +95,8 @@ export default function Catalog() {
 
     return (
         <div className="w-full max-w-7xl mx-auto pb-24">
+            <Breadcrumbs currentPlant={infoPlant || selectedPlant?.plant} />
+            
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -93,12 +113,7 @@ export default function Catalog() {
             </motion.div>
 
             {/* Filtros */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="flex flex-wrap items-center justify-center gap-3 mb-12"
-            >
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
                 {filters.map(filter => (
                     <button
                         key={filter.id}
@@ -112,19 +127,18 @@ export default function Catalog() {
                         {filter.label}
                     </button>
                 ))}
-            </motion.div>
+            </div>
 
-            {/* Grid */}
+            {/* Grid de Plantas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {plants.map((plant, index) => (
                     <motion.div
                         key={plant.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
+                        transition={{ delay: index * 0.04 }}
                         className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-sage/10 group flex flex-col"
                     >
-                        {/* Image Box */}
                         <div className="relative aspect-[4/5] bg-bone overflow-hidden flex items-center justify-center">
                             {plant.petSafe && (
                                 <div className="absolute top-4 left-4 z-10 bg-white px-3 py-1 rounded-full shadow-md flex items-center gap-1.5">
@@ -132,16 +146,11 @@ export default function Catalog() {
                                     <span className="text-[10px] font-black tracking-wider text-forest uppercase">Pet Friendly</span>
                                 </div>
                             )}
-
                             <img 
                                 src={plant.imageUrl || 'https://via.placeholder.com/400x500?text=Sin+Imagen'} 
                                 alt={plant.name} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                                onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/400x500?text=Sin+Imagen';
-                                }}
                             />
-
                             <button
                                 onClick={() => setInfoPlant(plant)}
                                 className="absolute bottom-5 right-5 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg text-forest/50 hover:text-forest hover:bg-white transition-all hover:scale-110 z-10"
@@ -150,25 +159,56 @@ export default function Catalog() {
                             </button>
                         </div>
 
-                        {/* Details */}
-                        <div className="p-6 flex flex-col flex-1">
-                            <h3 className="text-xl font-black text-forest mb-1">{plant.name}</h3>
-                            <div className="flex justify-between items-end mt-auto pt-4 border-t border-sage/10">
-                                <div>
-                                    <p className="text-xs font-bold text-forest/50 uppercase tracking-wider mb-1">
-                                        Nivel: {plant.careLevel === 'facil' ? 'Fácil' : plant.careLevel === 'normal' ? 'Normal' : 'Experto'}
-                                    </p>
-                                    <p className="text-lg font-black text-forest">
-                                        ${typeof plant.price === 'number' ? plant.price.toFixed(2) : plant.price}
-                                    </p>
+                        <div className="p-5 flex flex-col flex-1">
+                            <h3 className="text-lg font-black text-forest mb-0.5 leading-tight">{plant.name}</h3>
+                            <p className="text-xs font-bold text-forest/40 uppercase tracking-wider mb-3">
+                                Nivel: {plant.careLevel === 'facil' ? 'Fácil' : plant.careLevel === 'normal' ? 'Normal' : 'Experto'}
+                            </p>
+
+                            <div className="mt-auto pt-4 border-t border-sage/10 space-y-3">
+                                <p className="text-xl font-black text-forest">${plant.price?.toFixed(2) ?? '—'}</p>
+
+                                {/* Selector de cantidad */}
+                                <div className="flex items-center gap-2 bg-bone rounded-xl px-3 py-1.5 w-fit">
+                                    <button onClick={() => changeQty(plant.id, -1)} className="w-6 h-6 rounded-full flex items-center justify-center text-forest/60 hover:bg-sage/20 transition-colors">
+                                        <Minus size={12} />
+                                    </button>
+                                    <span className="w-6 text-center font-black text-forest text-sm">{getQty(plant.id)}</span>
+                                    <button onClick={() => changeQty(plant.id, 1)} className="w-6 h-6 rounded-full flex items-center justify-center text-forest/60 hover:bg-sage/20 transition-colors">
+                                        <Plus size={12} />
+                                    </button>
                                 </div>
 
-                                <button
-                                    onClick={() => handleAddToCart(plant)}
-                                    className="bg-forest text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-sage transition-all hover:scale-105 shadow-md shadow-forest/20"
-                                >
-                                    <ShoppingBag size={18} /> Adoptar
-                                </button>
+                                <div className="flex gap-2">
+                                    <motion.button
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => handleAddToCart(plant)}
+                                        className={`flex-1 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all text-sm ${
+                                            added[plant.id] ? 'bg-green-500 text-white' : 'bg-bone border border-sage/30 text-forest hover:bg-sage/10'
+                                        }`}
+                                    >
+                                        <AnimatePresence mode="wait">
+                                            {added[plant.id] ? (
+                                                <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1">
+                                                    <Check size={14} /> ¡Listo!
+                                                </motion.span>
+                                            ) : (
+                                                <motion.span key="cart" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1.5">
+                                                    <ShoppingCart size={14} /> Carrito
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setSelectedPlant({ plant, quantity: getQty(plant.id) })}
+                                        className="flex-1 bg-forest text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage transition-all shadow-md shadow-forest/20 text-sm"
+                                    >
+                                        <ShoppingBag size={14} /> Adoptar
+                                    </motion.button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -185,7 +225,8 @@ export default function Catalog() {
             <CheckoutModal
                 isOpen={!!selectedPlant}
                 onClose={() => setSelectedPlant(null)}
-                plant={selectedPlant}
+                plant={selectedPlant?.plant || null}
+                initialQuantity={selectedPlant?.quantity || 1}
             />
 
             <PlantDetailsModal

@@ -36,11 +36,18 @@ export const GlobalProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, password) => {
+    const register = async (name, email, password, phone) => {
         try {
-            const data = await authAPI.register(name, email, password);
-            localStorage.setItem('tsu_token', data.token);
-            setUser(data.user);
+            const data = await authAPI.register(name, email, password, phone);
+            // Si el backend pide verificación, no logueamos aún
+            if (data.requiresVerification) {
+                return { success: true, requiresVerification: true, email };
+            }
+            // En caso de que no requiera verificación (legado)
+            if (data.token) {
+                localStorage.setItem('tsu_token', data.token);
+                setUser(data.user);
+            }
             return { success: true };
         } catch (err) {
             return { success: false, error: err.message };
@@ -64,18 +71,28 @@ export const GlobalProvider = ({ children }) => {
     useEffect(() => { fetchPlants(); }, [fetchPlants]);
 
     // ========== QUIZ / RECOMENDACIONES ==========
-    const [quizAnswers, setQuizAnswers] = useState(null);
-    const [recommendations, setRecommendations] = useState([]);
+    const [quizAnswers, setQuizAnswers] = useState(() => {
+        const saved = localStorage.getItem('tsu_quiz_answers');
+        return saved ? JSON.parse(saved) : null;
+    });
+    const [recommendations, setRecommendations] = useState(() => {
+        const saved = localStorage.getItem('tsu_recommendations');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     const handleDiagnostic = async (answers) => {
         setQuizAnswers(answers);
         try {
             const data = await plantsAPI.quiz(answers);
             setRecommendations(data);
+            localStorage.setItem('tsu_quiz_answers', JSON.stringify(answers));
+            localStorage.setItem('tsu_recommendations', JSON.stringify(data));
         } catch (err) {
             console.error('Error en quiz:', err);
-            // Fallback local
-            setRecommendations(plantDatabase.slice(0, 3));
+            const fallback = plantDatabase.slice(0, 3);
+            setRecommendations(fallback);
+            localStorage.setItem('tsu_quiz_answers', JSON.stringify(answers));
+            localStorage.setItem('tsu_recommendations', JSON.stringify(fallback));
         }
     };
 
@@ -122,8 +139,8 @@ export const GlobalProvider = ({ children }) => {
 
     const likePost = async (postId) => {
         try {
-            const { likes } = await postsAPI.like(postId);
-            setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes } : p));
+            const { likes, likedBy } = await postsAPI.like(postId);
+            setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes, likedBy } : p));
         } catch (err) {
             console.error('Error dando like:', err);
         }
@@ -140,6 +157,76 @@ export const GlobalProvider = ({ children }) => {
         }
     };
 
+    // ========== CARRITO ==========
+    // Normalizar un plant para que siempre tenga price como número
+    const normalizePlant = (plant) => ({
+        ...plant,
+        price: parseFloat(plant?.price) || 0,
+    });
+
+    // Validar que un item del carrito tenga estructura correcta
+    const isValidItem = (item) =>
+        item &&
+        typeof item === 'object' &&
+        item.plant &&
+        typeof item.plant === 'object' &&
+        item.plant.id !== undefined &&
+        !isNaN(parseFloat(item.plant.price)) &&
+        typeof item.quantity === 'number';
+
+    const [cart, setCart] = useState(() => {
+        try {
+            const saved = localStorage.getItem('tsu_cart');
+            if (!saved) return [];
+            const parsed = JSON.parse(saved);
+            if (!Array.isArray(parsed)) { localStorage.removeItem('tsu_cart'); return []; }
+            // Normalizar y limpiar desde el inicio
+            const valid = parsed
+                .filter(isValidItem)
+                .map(item => ({ ...item, plant: normalizePlant(item.plant) }));
+            return valid;
+        } catch { localStorage.removeItem('tsu_cart'); return []; }
+    });
+    const [isCartOpen, setIsCartOpen] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem('tsu_cart', JSON.stringify(cart));
+    }, [cart]);
+
+    const addToCart = (plant, qty = 1) => {
+        const safePlant = normalizePlant(plant);
+        setCart(prev => {
+            const clean = prev.filter(isValidItem);
+            const existing = clean.find(item => item.plant.id === safePlant.id);
+            if (existing) {
+                return clean.map(item =>
+                    item.plant.id === safePlant.id
+                        ? { ...item, quantity: item.quantity + qty }
+                        : item
+                );
+            }
+            return [...clean, { plant: safePlant, quantity: qty }];
+        });
+        setIsCartOpen(true);
+    };
+
+    const removeFromCart = (plantId) => {
+        setCart(prev => prev.filter(item => item?.plant?.id !== plantId));
+    };
+
+    const updateQty = (plantId, qty) => {
+        if (qty <= 0) { removeFromCart(plantId); return; }
+        setCart(prev => prev.map(item =>
+            item?.plant?.id === plantId ? { ...item, quantity: qty } : item
+        ).filter(isValidItem));
+    };
+
+    const clearCart = () => setCart([]);
+
+    const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const cartTotal = cart.reduce((sum, item) => sum + (parseFloat(item.plant?.price) || 0) * (item.quantity || 1), 0);
+
+
     return (
         <GlobalContext.Provider value={{
             user, isAuthenticated, login, register, logout, updateProfile,
@@ -147,6 +234,8 @@ export const GlobalProvider = ({ children }) => {
             myPlants, adoptPlant,
             recommendations, quizAnswers, handleDiagnostic,
             plantDatabase,
+            cart, addToCart, removeFromCart, updateQty, clearCart,
+            cartCount, cartTotal, isCartOpen, setIsCartOpen,
         }}>
             {children}
         </GlobalContext.Provider>

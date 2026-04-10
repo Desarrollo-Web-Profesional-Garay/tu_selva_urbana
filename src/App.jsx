@@ -5,11 +5,15 @@ import { GlobalContext } from './context/GlobalContext';
 // Componentes de Estructura y Protección
 import Layout from './components/Layout';
 import AdminRoute from './components/AdminRoute'; 
+import Footer from './components/Footer';
+import QuizNudge from './components/QuizNudge';
 
 // Páginas Públicas
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Quiz from './pages/Quiz';
+import NotFound from './pages/NotFound';
+import ResetPassword from './pages/ResetPassword';
 
 // Páginas Privadas (Dentro del App con Layout)
 import Feed from './pages/Feed';
@@ -24,11 +28,10 @@ import PlantDetail from './pages/PlantDetail';
 
 // --- PÁGINAS DE ADMINISTRACIÓN ---
 import AdminPanel from './pages/AdminPanel';
-import UsersTable from './pages/UsersTable'; // Importamos la nueva tabla de usuarios
+import UsersTable from './pages/UsersTable';
 
 /**
  * Componente para proteger rutas que requieren autenticación general.
- * Redirige al login si el usuario no ha iniciado sesión.
  */
 function ProtectedRoute({ children }) {
     const { isAuthenticated } = useContext(GlobalContext);
@@ -40,6 +43,20 @@ function ProtectedRoute({ children }) {
     return children;
 }
 
+/**
+ * Layout interno que incluye el Layout base, el Footer y el QuizNudge
+ * que trajeron tus compañeros de la rama main.
+ */
+function InnerLayout() {
+    return (
+        <>
+            <Layout />
+            <QuizNudge />
+            <Footer />
+        </>
+    );
+}
+
 function App() {
     return (
         <Router>
@@ -47,10 +64,11 @@ function App() {
                 {/* 1. RUTAS PÚBLICAS */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Login />} />
                 <Route path="/quiz" element={<Quiz />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-                {/* 2. RUTAS DE ADMINISTRACIÓN (Protegidas por Rol Admin) */}
-                {/* Se agrupan bajo AdminRoute para mayor seguridad */}
+                {/* 2. RUTAS DE ADMINISTRACIÓN (Tus cambios de Admin) */}
                 <Route 
                     path="/admin" 
                     element={
@@ -68,15 +86,8 @@ function App() {
                     } 
                 />
 
-                {/* 3. RUTAS PROTEGIDAS (Envueltas en el Layout de usuario) */}
-                <Route 
-                    element={
-                        <ProtectedRoute>
-                            <Layout />
-                        </ProtectedRoute>
-                    }
-                >
-                    {/* Navegación Principal */}
+                {/* 3. RUTAS PROTEGIDAS (Usando el InnerLayout actualizado) */}
+                <Route element={<ProtectedRoute><InnerLayout /></ProtectedRoute>}>
                     <Route path="/feed" element={<Feed />} />
                     <Route path="/recomendaciones" element={<Recommendations />} />
                     <Route path="/catalogo" element={<Catalog />} />
@@ -88,8 +99,8 @@ function App() {
                     <Route path="/detalle-planta" element={<PlantDetail />} />
                 </Route>
 
-                {/* 4. FALLBACK (Redirección por defecto si la ruta no existe) */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* 4. FALLBACK - Página 404 de tus compañeros */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
     );

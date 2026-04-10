@@ -1,27 +1,29 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Sparkles, Leaf, Compass, PlusCircle, LogOut, Library, Star } from 'lucide-react';
+import { Home, Sparkles, Leaf, Compass, PlusCircle, LogOut, Library, ShoppingCart, ScanLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../context/GlobalContext';
 import CreatePostModal from './CreatePostModal';
 import ScannerModal from './ScannerModal';
-import { ScanLine } from 'lucide-react';
+import CartDrawer from './CartDrawer';
+import Chatbot from './Chatbot';
+import Footer from './Footer';
 
 export default function Layout() {
     const navItems = [
         { to: '/feed', icon: Home, label: 'Feed Social' },
-        { to: '/recomendaciones', icon: Star, label: 'Recomendaciones' },
+        { to: '/recomendaciones', icon: Sparkles, label: 'Recomendaciones' },
         { to: '/catalogo', icon: Library, label: 'Catálogo Global' },
         { to: '/mis-plantas', icon: Leaf, label: 'Mi Selva' },
     ];
 
     const navigate = useNavigate();
-    const { user, logout } = useContext(GlobalContext);
+    const { user, logout, cartCount, setIsCartOpen } = useContext(GlobalContext);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
 
     return (
-        <div className="flex h-screen w-screen bg-bone overflow-hidden">
+        <div className="flex h-screen w-screen bg-bone bg-organic-pattern bg-[length:600px_600px] overflow-hidden">
             {/* Sidebar Desktop (Premium Web Design) */}
             <aside className="hidden lg:flex flex-col w-80 bg-white/80 backdrop-blur-xl border-r border-sage/20 shadow-xl z-20 flex-shrink-0">
                 <div className="p-10 flex items-center gap-4">
@@ -33,91 +35,115 @@ export default function Layout() {
                     </h1>
                 </div>
 
-                <nav className="flex-1 px-8 space-y-4 mt-8">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                            <NavLink
-                                key={item.to}
-                                to={item.to}
-                                className={({ isActive }) =>
-                                    `flex items-center gap-5 px-6 py-5 rounded-2xl transition-all duration-300 relative group overflow-hidden ${isActive
-                                        ? 'text-white shadow-lg shadow-forest/10'
-                                        : 'text-forest/70 hover:bg-sage/10 hover:text-forest'
-                                    }`
-                                }
-                            >
-                                {({ isActive }) => (
-                                    <>
-                                        {/* Indicador Animado Activo */}
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="sidebar-active"
-                                                className="absolute inset-0 bg-forest rounded-2xl -z-10"
-                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                            />
+                <div className="flex-1 w-full flex flex-col min-h-0">
+                    <div className="flex-1 w-full overflow-y-auto hide-scrollbar flex flex-col">
+                        <nav className="px-8 space-y-4 mt-4 pb-4">
+                            {navItems.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <NavLink
+                                        key={item.to}
+                                        to={item.to}
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-5 px-6 py-5 rounded-2xl transition-all duration-300 relative group overflow-hidden ${isActive
+                                                ? 'text-white shadow-lg shadow-forest/10'
+                                                : 'text-forest/70 hover:bg-sage/10 hover:text-forest'
+                                            }`
+                                        }
+                                    >
+                                        {({ isActive }) => (
+                                            <>
+                                                {/* Indicador Animado Activo */}
+                                                {isActive && (
+                                                    <motion.div
+                                                        layoutId="sidebar-active"
+                                                        className="absolute inset-0 bg-forest rounded-2xl -z-10"
+                                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                                    />
+                                                )}
+
+                                                <Icon size={24} className={`relative z-10 transition-transform duration-300 group-hover:scale-110 shrink-0 ${isActive ? 'text-sage' : ''}`} />
+                                                <span className="font-bold text-[16px] relative z-10 tracking-wide">
+                                                    {item.label}
+                                                </span>
+                                            </>
                                         )}
+                                    </NavLink>
+                                );
+                            })}
+                        </nav>
+                    </div>
 
-                                        <Icon size={24} className={`relative z-10 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'text-sage' : ''}`} />
-                                        <span className="font-bold text-[16px] relative z-10 tracking-wide">
-                                            {item.label}
-                                        </span>
-                                    </>
-                                )}
-                            </NavLink>
-                        );
-                    })}
-                </nav>
+                    {/* User Profile & Post Action */}
+                    <div className="px-6 pb-6 pt-4 flex flex-col gap-4 border-t border-sage/10 shrink-0">
+                        {/* Botón Carrito */}
+                        <button
+                            onClick={() => setIsCartOpen(true)}
+                            className="w-full bg-bone border border-sage/30 text-forest font-bold py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-sage/10 transition-all relative"
+                        >
+                            <ShoppingCart size={18} /> Mi Carrito
+                            {cartCount > 0 && (
+                                <motion.span
+                                    key={cartCount}
+                                    initial={{ scale: 0.5 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-terra text-white rounded-full text-[10px] font-black flex items-center justify-center"
+                                >
+                                    {cartCount}
+                                </motion.span>
+                            )}
+                        </button>
 
-                {/* User Profile & Post Action */}
-                <div className="p-6 mt-4 flex flex-col gap-4">
-                    <button
-                        onClick={() => setIsScannerOpen(true)}
-                        className="w-full bg-gradient-to-r from-sage to-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-sage/30 flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:scale-[1.02] active:scale-95 border border-white/20 relative overflow-hidden group"
-                    >
-                        <ScanLine size={20} className="group-hover:animate-pulse" /> IA Scanner
-                        <div className="absolute top-0 left-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-                    </button>
+                        <button
+                            onClick={() => setIsScannerOpen(true)}
+                            className="w-full bg-gradient-to-r from-sage to-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-sage/30 flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:scale-[1.02] active:scale-95 border border-white/20 relative overflow-hidden group"
+                        >
+                                <ScanLine size={20} className="group-hover:animate-pulse shrink-0" /> IA Scanner
+                                <div className="absolute top-0 left-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                            </button>
 
-                    <button
-                        onClick={() => setIsPostModalOpen(true)}
-                        className="w-full bg-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-forest/20 flex items-center justify-center gap-2 hover:bg-[#1A251B] transition-all hover:scale-[1.02] active:scale-95"
-                    >
-                        <PlusCircle size={20} /> Publicar
-                    </button>
+                            <button
+                                onClick={() => setIsPostModalOpen(true)}
+                                className="w-full bg-forest text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-forest/20 flex items-center justify-center gap-2 hover:bg-[#1A251B] transition-all hover:scale-[1.02] active:scale-95"
+                            >
+                                <PlusCircle size={20} className="shrink-0" /> Publicar
+                            </button>
 
-                    <div className="flex items-center justify-between p-3 bg-white/50 rounded-2xl border border-sage/20 hover:bg-white transition-colors cursor-pointer group" onClick={() => navigate('/mi-cuenta')}>
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <img
-                                src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=ECECE5&color=2C3E2D`}
-                                alt={user?.name}
-                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-                            />
-                            <div className="flex flex-col overflow-hidden">
-                                <span className="font-bold text-sm text-forest truncate">{user?.name}</span>
-                                <span className="text-xs text-forest/50 truncate">Ver perfil</span>
+                            <div className="flex items-center justify-between p-3 bg-white/50 rounded-2xl border border-sage/20 hover:bg-white transition-colors cursor-pointer group" onClick={() => navigate('/mi-cuenta')}>
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <img
+                                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=ECECE5&color=2C3E2D`}
+                                        alt={user?.name}
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm shrink-0"
+                                    />
+                                    <div className="flex flex-col overflow-hidden">
+                                        <span className="font-bold text-sm text-forest truncate">{user?.name}</span>
+                                        <span className="text-xs text-forest/50 truncate">Ver perfil</span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        logout();
+                                        navigate('/login');
+                                    }}
+                                    className="p-2 text-forest/40 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 shrink-0"
+                                    title="Cerrar sesión"
+                                >
+                                    <LogOut size={16} />
+                                </button>
                             </div>
                         </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                logout();
-                                navigate('/login');
-                            }}
-                            className="p-2 text-forest/40 hover:text-red-500 transition-colors rounded-full hover:bg-red-50"
-                            title="Cerrar sesión"
-                        >
-                            <LogOut size={16} />
-                        </button>
                     </div>
-                </div>
+
             </aside>
 
-            {/* Main Content Area - Expansivo y sin restricciones de ancho */}
+            {/* Main Content Area */}
             <main className="flex-1 relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar bg-bone/50">
                 <div className="w-full max-w-[1600px] mx-auto px-6 py-8 md:px-12 lg:px-20 lg:py-16 min-h-full">
                     <Outlet />
                 </div>
+                <Footer />
             </main>
 
             {/* Mobile Bottom Nav (Fallback solo para celulares) */}
@@ -130,18 +156,18 @@ export default function Layout() {
                                 key={item.to}
                                 to={item.to}
                                 className={({ isActive }) =>
-                                    `flex flex-col items-center justify-center w-20 h-full transition-colors relative ${isActive ? 'text-forest' : 'text-gray-400 hover:text-sage'
+                                    `flex flex-col items-center justify-center w-14 sm:w-20 h-full transition-colors relative ${isActive ? 'text-forest' : 'text-gray-400 hover:text-sage'
                                     }`
                                 }
                             >
                                 {({ isActive }) => (
                                     <>
-                                        <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
-                                        <span className="text-[11px] font-bold mt-1.5">{item.label}</span>
+                                        <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                                        <span className="text-[10px] sm:text-[11px] font-bold mt-1.5 truncate w-full text-center">{item.label}</span>
                                         {isActive && (
                                             <motion.div
                                                 layoutId="bottom-nav-mobile"
-                                                className="absolute top-0 w-12 h-1.5 bg-sage rounded-b-full"
+                                                className="absolute top-0 w-10 h-1.5 bg-sage rounded-b-full"
                                             />
                                         )}
                                     </>
@@ -149,10 +175,41 @@ export default function Layout() {
                             </NavLink>
                         );
                     })}
+                    <NavLink
+                        to="/mi-cuenta"
+                        className={({ isActive }) =>
+                            `flex flex-col items-center justify-center w-14 sm:w-20 h-full transition-colors relative ${isActive ? 'text-forest' : 'text-gray-400 hover:text-sage'}`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'U'}&background=ECECE5&color=2C3E2D`} className={`w-6 h-6 rounded-full mb-1 object-cover border-[1.5px] ${isActive ? 'border-terra' : 'border-transparent'}`} alt="Perfil" />
+                                <span className="text-[10px] sm:text-[11px] font-bold mt-1.5">Perfil</span>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="bottom-nav-mobile"
+                                        className="absolute top-0 w-10 h-1.5 bg-sage rounded-b-full"
+                                    />
+                                )}
+                            </>
+                        )}
+                    </NavLink>
                 </div>
             </nav>
 
-            <nav className="lg:hidden fixed bottom-16 right-4 z-50">
+            <nav className="lg:hidden fixed bottom-16 right-4 z-50 flex flex-col gap-3">
+                {/* Botón carrito mobile */}
+                <button
+                    onClick={() => setIsCartOpen(true)}
+                    className="w-12 h-12 bg-white border border-sage/30 text-forest rounded-full flex items-center justify-center shadow-lg relative"
+                >
+                    <ShoppingCart size={20} />
+                    {cartCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-terra text-white rounded-full text-[10px] font-black flex items-center justify-center">
+                            {cartCount}
+                        </span>
+                    )}
+                </button>
                 <button
                     onClick={() => setIsScannerOpen(true)}
                     className="w-14 h-14 bg-gradient-to-r from-sage to-forest text-white rounded-full flex items-center justify-center shadow-lg shadow-sage/30 hover:scale-110 transition-transform"
@@ -163,6 +220,8 @@ export default function Layout() {
 
             <CreatePostModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
             <ScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
+            <CartDrawer />
+            <Chatbot />
         </div>
     );
 }

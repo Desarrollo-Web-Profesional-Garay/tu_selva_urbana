@@ -30,8 +30,20 @@ export const authAPI = {
     login: (email, password) =>
         request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
 
-    register: (name, email, password) =>
-        request('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+    register: (name, email, password, phone) =>
+        request('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, phone }) }),
+
+    verifyEmail: (email, code) =>
+        request('/auth/verify-email', { method: 'POST', body: JSON.stringify({ email, code }) }),
+
+    forgotPassword: (email) =>
+        request('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
+
+    resetPassword: (token, password) =>
+        request('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password }) }),
+
+    resendCode: (email) =>
+        request('/auth/resend-code', { method: 'POST', body: JSON.stringify({ email }) }),
 };
 
 // ========== PLANTS ==========
@@ -88,12 +100,14 @@ export const postsAPI = {
         request('/posts', { method: 'POST', body: JSON.stringify(data) }),
     like: (id) =>
         request(`/posts/${id}/like`, { method: 'POST' }),
+    getComments: (id) => request(`/posts/${id}/comments`),
+    addComment: (id, text) => request(`/posts/${id}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
 };
 
 // ========== ORDERS ==========
 export const ordersAPI = {
-    create: (items) =>
-        request('/orders', { method: 'POST', body: JSON.stringify({ items }) }),
+    create: (items, address, paymentMethod) =>
+        request('/orders', { method: 'POST', body: JSON.stringify({ items, address, paymentMethod }) }),
     getAll: () => request('/orders'),
 };
 
@@ -105,4 +119,10 @@ export const usersAPI = {
     getMyPlants: () => request('/users/me/plants'),
     adoptPlant: (plantId) =>
         request('/users/me/plants', { method: 'POST', body: JSON.stringify({ plantId }) }),
+};
+
+// ========== CHATBOT ==========
+export const chatAPI = {
+    sendMessage: (message, context) =>
+        request('/chat', { method: 'POST', body: JSON.stringify({ message, context }) })
 };
