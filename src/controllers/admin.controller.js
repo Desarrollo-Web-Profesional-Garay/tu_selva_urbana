@@ -53,9 +53,72 @@ const updateOrderStatus = async (req, res) => {
         console.error("Error al actualizar pedido:", error);
         res.status(500).json({ error: "Error al actualizar el estado del pedido." });
     }
+    
+};
+// --- Gestión de Usuarios ---
+
+// Listar todos los usuarios (sin el password)
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                phone: true,
+                createdAt: true,
+                avatar: true
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(users);
+    } catch (error) {
+        console.error("Error al listar usuarios:", error);
+        res.status(500).json({ error: "Error al obtener la lista de usuarios." });
+    }
+};
+
+// Eliminar un usuario por ID
+const deleteUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await prisma.user.delete({
+            where: { id: parseInt(id) }
+        });
+        res.json({ message: "Usuario eliminado correctamente (borrado en cascada aplicado)." });
+    } catch (error) {
+        console.error("Error al eliminar usuario:", error);
+        res.status(500).json({ error: "Error al intentar eliminar el usuario." });
+    }
+};
+
+// Cambiar el rol de un usuario
+const updateUserRole = async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!['user', 'admin'].includes(role)) {
+        return res.status(400).json({ error: "Rol no válido. Use 'user' o 'admin'." });
+    }
+
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { id: parseInt(id) },
+            data: { role },
+            select: { id: true, name: true, role: true }
+        });
+        res.json({ message: "Rol actualizado", user: updatedUser });
+    } catch (error) {
+        console.error("Error al actualizar rol:", error);
+        res.status(500).json({ error: "Error al actualizar el rol del usuario." });
+    }
 };
 
 module.exports = {
     getAllOrders,
-    updateOrderStatus
+    updateOrderStatus,
+    getAllUsers,    // Agregado
+    deleteUser,     // Agregado
+    updateUserRole  // Agregado
 };
