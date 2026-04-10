@@ -173,17 +173,19 @@ export const GlobalProvider = ({ children }) => {
 
     const addToCart = (plant, qty = 1) => {
         setCart(prev => {
-            const existing = prev.find(item => item.plant.id === plant.id);
+            // Limpiar items corruptos antes de operar
+            const clean = prev.filter(item => item?.plant?.id !== undefined && item?.plant?.price !== undefined);
+            const existing = clean.find(item => item.plant.id === plant.id);
             if (existing) {
-                return prev.map(item =>
+                return clean.map(item =>
                     item.plant.id === plant.id
                         ? { ...item, quantity: item.quantity + qty }
                         : item
                 );
             }
-            return [...prev, { plant, quantity: qty }];
+            return [...clean, { plant, quantity: qty }];
         });
-        setIsCartOpen(true); // Abrir carrito al agregar
+        setIsCartOpen(true);
     };
 
     const removeFromCart = (plantId) => {

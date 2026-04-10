@@ -168,15 +168,14 @@ function useSuccessSound() {
     return { playSound };
 }
 
-export default function CheckoutModal({ isOpen, onClose, plant, cartItems }) {
+export default function CheckoutModal({ isOpen, onClose, plant, cartItems, initialQuantity = 1 }) {
     const { adoptPlant, clearCart } = useContext(GlobalContext);
-    const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
+    const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('card');
     const { playSound } = useSuccessSound();
 
-    // Form data
     const [addressStreet, setAddressStreet] = useState('');
     const [addressCity, setAddressCity] = useState('');
     const [addressZip, setAddressZip] = useState('');
@@ -186,10 +185,10 @@ export default function CheckoutModal({ isOpen, onClose, plant, cartItems }) {
 
     const fullAddress = [addressStreet, addressCity, addressZip].filter(Boolean).join(', ');
 
-    // Construir lista de items según si viene una planta sola o el carrito completo
+    // Construir lista de items
     const orderItems = cartItems && cartItems.length > 0
         ? cartItems.map(item => ({ plantId: item.plant.id, quantity: item.quantity, price: item.plant.price }))
-        : plant ? [{ plantId: plant.id, quantity: 1, price: plant.price || 25 }] : [];
+        : plant ? [{ plantId: plant.id, quantity: initialQuantity, price: plant.price || 25 }] : [];
 
     const orderTotal = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
     const displayPlant = plant || (cartItems && cartItems.length > 0 ? cartItems[0].plant : null);

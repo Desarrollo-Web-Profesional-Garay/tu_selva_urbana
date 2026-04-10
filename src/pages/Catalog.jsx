@@ -8,12 +8,10 @@ import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function Catalog() {
     const { plantDatabase, addToCart } = useContext(GlobalContext);
-    const [selectedPlant, setSelectedPlant] = useState(null);
+    const [selectedPlant, setSelectedPlant] = useState(null); // { plant, quantity }
     const [infoPlant, setInfoPlant] = useState(null);
     const [activeFilter, setActiveFilter] = useState('todas');
-    // Mapa de { plantId: quantity } para el selector de cantidad
     const [quantities, setQuantities] = useState({});
-    // Mapa de { plantId: true } para mostrar el check animado al agregar
     const [added, setAdded] = useState({});
 
     const filters = [
@@ -180,7 +178,7 @@ export default function Catalog() {
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => setSelectedPlant(plant)}
+                                        onClick={() => setSelectedPlant({ plant, quantity: getQty(plant.id) })}
                                         className="flex-1 bg-forest text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:bg-sage transition-all shadow-md shadow-forest/20 text-sm"
                                     >
                                         <ShoppingBag size={14} /> Adoptar
@@ -202,7 +200,8 @@ export default function Catalog() {
             <CheckoutModal
                 isOpen={!!selectedPlant}
                 onClose={() => setSelectedPlant(null)}
-                plant={selectedPlant}
+                plant={selectedPlant?.plant || null}
+                initialQuantity={selectedPlant?.quantity || 1}
             />
 
             <PlantDetailsModal
