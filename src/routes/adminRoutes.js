@@ -40,4 +40,20 @@ router.put('/users/:id/role', ctrl.updateUserRole);
 // DELETE /api/admin/users/:id
 router.delete('/users/:id', ctrl.deleteUser);
 
+// ==========================================
+// GESTIÓN DE PLANTAS (CATÁLOGO)
+// ==========================================
+
+// Crear planta
+// POST /api/admin/plants
+router.post('/plants', ctrl.createPlant);
+
+// Editar planta
+// PUT /api/admin/plants/:id
+router.put('/plants/:id', ctrl.updatePlant);
+
+// Eliminar planta
+// DELETE /api/admin/plants/:id
+router.delete('/plants/:id', ctrl.deletePlant);
+
 module.exports = router;

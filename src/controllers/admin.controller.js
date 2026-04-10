@@ -114,11 +114,75 @@ const updateUserRole = async (req, res) => {
         res.status(500).json({ error: "Error al actualizar el rol del usuario." });
     }
 };
+// --- Gestión de Plantas del Catálogo ---
 
+// Crear una nueva planta
+const createPlant = async (req, res) => {
+    const { name, slug, price, careLevel, light, petSafe, imageUrl, tag } = req.body;
+
+    try {
+        const newPlant = await prisma.plant.create({
+            data: {
+                name,
+                slug: slug || name.toLowerCase().replace(/ /g, '-'), // Genera slug si no hay
+                price: parseFloat(price) || 0,
+                careLevel: careLevel || "normal",
+                light: light || [], // Espera un arreglo como ["Poca", "Media"]
+                petSafe: petSafe || false,
+                imageUrl,
+                tag
+            }
+        });
+        res.status(201).json({ message: "Planta creada con éxito", plant: newPlant });
+    } catch (error) {
+        console.error("Error al crear planta:", error);
+        if (error.code === 'P2002') {
+            return res.status(400).json({ error: "El slug o nombre ya existe." });
+        }
+        res.status(500).json({ error: "Error al crear la planta en el catálogo." });
+    }
+};
+
+// Editar una planta existente
+const updatePlant = async (req, res) => {
+    const { id } = req.params;
+    const data = req.body;
+
+    try {
+        // Convertimos el precio a float si viene en el body
+        if (data.price) data.price = parseFloat(data.price);
+
+        const updatedPlant = await prisma.plant.update({
+            where: { id: parseInt(id) },
+            data: data
+        });
+        res.json({ message: "Planta actualizada correctamente", plant: updatedPlant });
+    } catch (error) {
+        console.error("Error al actualizar planta:", error);
+        res.status(500).json({ error: "Error al actualizar la planta." });
+    }
+};
+
+// Eliminar una planta del catálogo
+const deletePlant = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await prisma.plant.delete({
+            where: { id: parseInt(id) }
+        });
+        res.json({ message: "Planta eliminada del catálogo satisfactoriamente." });
+    } catch (error) {
+        console.error("Error al eliminar planta:", error);
+        res.status(500).json({ error: "Error al intentar eliminar la planta." });
+    }
+};
 module.exports = {
     getAllOrders,
     updateOrderStatus,
-    getAllUsers,    // Agregado
-    deleteUser,     // Agregado
-    updateUserRole  // Agregado
+    getAllUsers,
+    deleteUser,
+    updateUserRole,
+    createPlant,   // Nuevo
+    updatePlant,   // Nuevo
+    deletePlant    // Nuevo
 };
