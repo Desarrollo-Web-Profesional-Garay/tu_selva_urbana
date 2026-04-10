@@ -7,6 +7,7 @@ const plantsRoutes = require('./routes/plants.routes');
 const postsRoutes = require('./routes/posts.routes');
 const ordersRoutes = require('./routes/orders.routes');
 const usersRoutes = require('./routes/users.routes');
+const adminRoutes = require('./routes/admin.routes'); // <-- Importada la nueva ruta
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +23,7 @@ app.use('/api/posts', postsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/chat', require('./routes/chat.routes'));
+app.use('/api/admin', adminRoutes); // <-- Registrada la ruta de administración
 
 // Health check + diagnóstico
 app.get('/api/health', async (req, res) => {
@@ -79,5 +81,3 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🌿 Tu Selva Urbana API corriendo en el puerto ${PORT}`);
     console.log(`📋 Health check disponible (Bound to 0.0.0.0)`);
 });
-
-// Trigger nodemon restart
