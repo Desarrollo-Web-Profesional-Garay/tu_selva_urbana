@@ -1,19 +1,33 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { GlobalContext } from './context/GlobalContext';
+
+// Componentes de Estructura y Protección
 import Layout from './components/Layout';
-import Footer from './components/Footer';
+import AdminRoute from './components/AdminRoute';
 import QuizNudge from './components/QuizNudge';
+
+// Páginas Públicas
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
-import Feed from './pages/Feed';
 import Quiz from './pages/Quiz';
-import Recommendations from './pages/Recommendations';
-import MyPlants from './pages/MyPlants';
-import MyAccount from './pages/MyAccount';
-import Catalog from './pages/Catalog';
 import NotFound from './pages/NotFound';
 import ResetPassword from './pages/ResetPassword';
+
+// Páginas Privadas (Dentro del App con Layout)
+import Feed from './pages/Feed';
+import Recommendations from './pages/Recommendations';
+import Catalog from './pages/Catalog';
+import MyPlants from './pages/MyPlants';
+import MyAccount from './pages/MyAccount';
+
+// Flujo de Venta y Visualización
+import AddPlant from './pages/PlantForm';
+import PlantDetail from './pages/PlantDetail';
+
+// Páginas de Administración
+import AdminPanel from './pages/AdminPanel';
+import UsersTable from './pages/UsersTable';
 
 // Wrapper que protege rutas internas
 function ProtectedRoute({ children }) {
@@ -22,43 +36,33 @@ function ProtectedRoute({ children }) {
     return children;
 }
 
-// Layout interno con Footer y QuizNudge
-function InnerLayout() {
-    return (
-        <>
-            <Layout />
-            <QuizNudge />
-        </>
-    );
-}
-
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Landing Page pública */}
+                {/* 1. RUTAS PÚBLICAS */}
                 <Route path="/" element={<LandingPage />} />
-
-                {/* Login / Registro / Verificación */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/registro" element={<Login />} />
-
-                {/* Recuperación de contraseña */}
+                <Route path="/quiz" element={<Quiz />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
 
-                {/* Quiz (accesible sin auth para flujo de landing) */}
-                <Route path="/quiz" element={<Quiz />} />
+                {/* 2. RUTAS DE ADMINISTRACIÓN */}
+                <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+                <Route path="/admin/usuarios" element={<AdminRoute><UsersTable /></AdminRoute>} />
 
-                {/* Rutas protegidas con layout principal */}
-                <Route element={<ProtectedRoute><InnerLayout /></ProtectedRoute>}>
-                    <Route path="/feed" element={<Feed />} />
+                {/* 3. Rutas protegidas con layout principal */}
+                <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                    <Route path="/feed" element={<><Feed /><QuizNudge /></>} />
                     <Route path="/recomendaciones" element={<Recommendations />} />
                     <Route path="/catalogo" element={<Catalog />} />
                     <Route path="/mis-plantas" element={<MyPlants />} />
                     <Route path="/mi-cuenta" element={<MyAccount />} />
+                    <Route path="/vender" element={<AddPlant />} />
+                    <Route path="/detalle-planta" element={<PlantDetail />} />
                 </Route>
 
-                {/* 404 — NO redirige, mantiene la sesión */}
+                {/* 4. FALLBACK - Página 404 */}
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>

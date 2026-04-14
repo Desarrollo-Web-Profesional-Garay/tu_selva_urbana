@@ -101,7 +101,11 @@ export default function Catalog() {
                                     <span className="text-[10px] font-black tracking-wider text-forest uppercase">Pet Friendly</span>
                                 </div>
                             )}
-                            <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                            <img 
+                                src={plant.imageUrl || 'https://via.placeholder.com/400x500?text=Sin+Imagen'} 
+                                alt={plant.name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                            />
                             <button
                                 onClick={() => setInfoPlant(plant)}
                                 className="absolute bottom-5 right-5 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg text-forest/50 hover:text-forest hover:bg-white transition-all hover:scale-110 z-10"
@@ -114,11 +118,11 @@ export default function Catalog() {
                         <div className="p-5 flex flex-col flex-1">
                             <h3 className="text-lg font-black text-forest mb-0.5 leading-tight">{plant.name}</h3>
                             <p className="text-xs font-bold text-forest/40 uppercase tracking-wider mb-3">
-                                Nivel: {plant.careLevel}
+                                Nivel: {plant.careLevel === 'facil' ? 'Fácil' : plant.careLevel === 'normal' ? 'Normal' : 'Experto'}
                             </p>
 
                             <div className="mt-auto pt-4 border-t border-sage/10 space-y-3">
-                                <p className="text-xl font-black text-forest">${plant.price?.toFixed(2) ?? '—'}</p>
+                                <p className="text-xl font-black text-forest">${(parseFloat(plant.price) || 0).toFixed(2)}</p>
 
                                 {/* Selector de cantidad */}
                                 <div className="flex items-center gap-2 bg-bone rounded-xl px-3 py-1.5 w-fit">

@@ -204,25 +204,32 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); setError('');
+        setLoading(true);
+        setError('');
 
         if (mode === 'register') {
             try {
-                const data = await authAPI.register(form.name, form.email, form.password, form.phone);
-                if (data.requiresVerification) {
+                const result = await register(form.name, form.email, form.password, form.phone);
+                if (result.requiresVerification) {
                     setPendingEmail(form.email);
                     setPendingPhone(form.phone);
                     setMode('verify');
+                } else if (result.success) {
+                    if (result.user?.role === 'admin') navigate('/admin');
+                    else navigate('/feed');
                 }
             } catch (err) {
                 setError(err.message || 'Error al crear cuenta');
             }
         } else {
-            // Login directo — ya no hay usuarios sin verificar en la tabla User
             try {
                 const result = await login(form.email, form.password);
-                if (result.success) navigate('/feed');
-                else setError(result.error || 'Credenciales inválidas');
+                if (result.success) {
+                    if (result.user?.role === 'admin') navigate('/admin');
+                    else navigate('/feed');
+                } else {
+                    setError(result.error || 'Credenciales inválidas');
+                }
             } catch (err) {
                 setError(err.message || 'Credenciales inválidas');
             }
@@ -230,11 +237,11 @@ export default function Login() {
         setLoading(false);
     };
 
-    // Cuando verificación OTP tiene éxito — el backend devuelve token + user
+    // Cuando verificación OTP tiene éxito
     const onVerifySuccess = (data) => {
         localStorage.setItem('tsu_token', data.token);
-        // Recargar para que el GlobalContext lea el token
-        window.location.href = '/feed';
+        if (data.user?.role === 'admin') navigate('/admin');
+        else navigate('/feed');
     };
 
     const isRegister = mode === 'register';

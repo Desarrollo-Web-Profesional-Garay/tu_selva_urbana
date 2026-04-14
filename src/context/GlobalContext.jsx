@@ -28,33 +28,39 @@ export const GlobalProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const data = await authAPI.login(email, password);
-            localStorage.setItem('tsu_token', data.token);
-            setUser(data.user);
-            return { success: true };
+            if (data.token) {
+                localStorage.setItem('tsu_token', data.token);
+                setUser(data.user);
+                return { success: true, user: data.user };
+            }
+            return { success: false, error: 'Respuesta de servidor incompleta' };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err.message || 'Error al iniciar sesión' };
         }
     };
 
     const register = async (name, email, password, phone) => {
         try {
             const data = await authAPI.register(name, email, password, phone);
-            // Si el backend pide verificación, no logueamos aún
             if (data.requiresVerification) {
                 return { success: true, requiresVerification: true, email };
             }
-            // En caso de que no requiera verificación (legado)
             if (data.token) {
                 localStorage.setItem('tsu_token', data.token);
                 setUser(data.user);
             }
-            return { success: true };
+            return { success: true, user: data.user };
         } catch (err) {
             return { success: false, error: err.message };
         }
     };
 
-    const logout = () => setUser(null);
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem('tsu_user');
+        localStorage.removeItem('tsu_token');
+        window.location.href = '/login';
+    };
 
     // ========== PLANTS (catálogo) ==========
     const [plantDatabase, setPlantDatabase] = useState([]);
@@ -231,9 +237,9 @@ export const GlobalProvider = ({ children }) => {
         <GlobalContext.Provider value={{
             user, isAuthenticated, login, register, logout, updateProfile,
             posts, likePost, fetchPosts,
-            myPlants, adoptPlant,
+            myPlants, adoptPlant, fetchMyPlants,
             recommendations, quizAnswers, handleDiagnostic,
-            plantDatabase,
+            plantDatabase, fetchPlants,
             cart, addToCart, removeFromCart, updateQty, clearCart,
             cartCount, cartTotal, isCartOpen, setIsCartOpen,
         }}>
