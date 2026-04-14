@@ -125,30 +125,52 @@ const updateUserRole = async (req, res) => {
 // GESTIÓN DE PLANTAS (CATÁLOGO)
 // ==========================================
 
-// Crear una nueva planta
+// Crear una nueva planta (VERSIÓN COMPLETA Y CORREGIDA)
 const createPlant = async (req, res) => {
-    const { name, slug, price, careLevel, light, petSafe, imageUrl, tag } = req.body;
+    const { 
+        name, slug, price, careLevel, light, petSafe, imageUrl, tag,
+        modelUrl, careWater, careLight, careHumidity  // Campos opcionales agregados
+    } = req.body;
+
+    // Validar campos obligatorios
+    if (!name || !imageUrl) {
+        return res.status(400).json({ 
+            error: "Faltan campos obligatorios: name e imageUrl son requeridos" 
+        });
+    }
 
     try {
         const newPlant = await prisma.plant.create({
             data: {
                 name,
-                slug: slug || name.toLowerCase().replace(/ /g, '-'),
+                slug: slug || name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ /g, '-'),
                 price: parseFloat(price) || 0,
                 careLevel: careLevel || "normal",
                 light: light || [],
                 petSafe: petSafe || false,
                 imageUrl,
-                tag
+                tag: tag || null,
+                modelUrl: modelUrl || null,
+                careWater: careWater || null,
+                careLight: careLight || null,
+                careHumidity: careHumidity || null
             }
         });
-        res.status(201).json({ message: "Planta creada con éxito", plant: newPlant });
+        res.status(201).json({ 
+            success: true,
+            message: "Planta creada con éxito", 
+            plant: newPlant 
+        });
     } catch (error) {
         console.error("Error al crear planta:", error);
         if (error.code === 'P2002') {
-            return res.status(400).json({ error: "El slug o nombre ya existe." });
+            return res.status(400).json({ 
+                error: "El slug o nombre ya existe. Usa otro nombre." 
+            });
         }
-        res.status(500).json({ error: "Error al crear la planta en el catálogo." });
+        res.status(500).json({ 
+            error: "Error al crear la planta en el catálogo." 
+        });
     }
 };
 

@@ -11,8 +11,6 @@ function generateOTP() {
 
 // =============================================
 // POST /api/auth/register
-// El usuario NO se crea en la tabla User.
-// Se guarda en PendingRegistration hasta que verifique el OTP.
 // =============================================
 exports.register = async (req, res) => {
     try {
@@ -22,7 +20,6 @@ exports.register = async (req, res) => {
             return res.status(400).json({ error: 'El número de teléfono es obligatorio' });
         }
 
-        // Verificar que el email no esté registrado en User (ya verificado)
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ error: 'El email ya está registrado' });
@@ -32,7 +29,6 @@ exports.register = async (req, res) => {
         const code = generateOTP();
         const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
 
-        // Upsert en PendingRegistration (si ya existe una pendiente, la sobreescribe)
         await prisma.pendingRegistration.upsert({
             where: { email },
             create: {
@@ -52,11 +48,9 @@ exports.register = async (req, res) => {
             },
         });
 
-        // Enviar email OTP
         const emailResult = await sendVerificationEmail(email, name, code);
         console.log(`📧 Registro pendiente ${email} — Email ${emailResult.success ? '✅ enviado' : '❌ ' + (emailResult.error || 'simulado')}`);
 
-        // Enviar SMS
         const smsResult = await sendSMSCode(phone, code);
         console.log(`📱 SMS ${phone} — ${smsResult.success ? '✅' : '❌ simulado'}`);
 
@@ -74,7 +68,6 @@ exports.register = async (req, res) => {
 
 // =============================================
 // POST /api/auth/verify-email
-// Verifica el OTP → crea el User real → elimina PendingRegistration
 // =============================================
 exports.verifyEmail = async (req, res) => {
     try {
@@ -93,14 +86,12 @@ exports.verifyEmail = async (req, res) => {
             return res.status(400).json({ error: 'El código ha expirado. Haz clic en "Reenviar código".' });
         }
 
-        // Verificar que no se creó el user mientras tanto
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             await prisma.pendingRegistration.delete({ where: { email } });
             return res.status(400).json({ error: 'Esta cuenta ya fue verificada. Inicia sesión.' });
         }
 
-        // ¡Código correcto! Crear el User real
         const user = await prisma.user.create({
             data: {
                 name: pending.name,
@@ -109,15 +100,17 @@ exports.verifyEmail = async (req, res) => {
                 phone: pending.phone,
                 avatar: null,
                 emailVerified: true,
+                role: 'user' // Rol por defecto para nuevos registros
             },
         });
 
-        // Eliminar registro pendiente
         await prisma.pendingRegistration.delete({ where: { email } });
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-        console.log(`✅ Usuario ${email} verificado y creado exitosamente.`);
+        const token = jwt.sign(
+            { userId: user.id, role: user.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '7d' }
+        );
 
         res.json({
             token,
@@ -126,6 +119,7 @@ exports.verifyEmail = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
+                role: user.role
             },
         });
     } catch (err) {
@@ -140,7 +134,6 @@ exports.verifyEmail = async (req, res) => {
 exports.resendCode = async (req, res) => {
     try {
         const { email } = req.body;
-
         const pending = await prisma.pendingRegistration.findUnique({ where: { email } });
         if (!pending) {
             return res.status(404).json({ error: 'No hay un registro pendiente para este email.' });
@@ -165,23 +158,58 @@ exports.resendCode = async (req, res) => {
 };
 
 // =============================================
-// POST /api/auth/login
+// POST /api/auth/login (CON SUPERUSUARIO)
 // =============================================
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // --- 1. INTERCEPTOR DE SUPERUSUARIO PARA PRUEBAS ---
+        if (email === "admin@test.com" && password === "admin123") {
+            const token = jwt.sign(
+                { userId: 999, role: 'admin' }, 
+                process.env.JWT_SECRET, 
+                { expiresIn: '7d' }
+            );
+
+            console.log("👑 Acceso concedido al Administrador de Pruebas");
+
+            return res.json({
+                token,
+                user: { 
+                    id: 999, 
+                    name: "Admin de Pruebas", 
+                    email: "admin@test.com", 
+                    avatar: null,
+                    role: 'admin' 
+                },
+            });
+        }
+
+        // --- 2. LÓGICA DE LOGIN NORMAL ---
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return res.status(401).json({ error: 'Credenciales inválidas' });
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return res.status(401).json({ error: 'Credenciales inválidas' });
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        // Generamos el token incluyendo el rol de la base de datos (o 'user' si es null)
+        const userRole = user.role || 'user';
+        const token = jwt.sign(
+            { userId: user.id, role: userRole }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '7d' }
+        );
 
         res.json({
             token,
-            user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                email: user.email, 
+                avatar: user.avatar,
+                role: userRole
+            },
         });
     } catch (err) {
         console.error('❌ Error en login:', err);
@@ -206,8 +234,7 @@ exports.forgotPassword = async (req, res) => {
             data: { resetToken: token, resetExpires: expires },
         });
 
-        const env = process.env;
-        const appUrl = env['APP_URL'] || 'https://tu-selva-urbana.up.railway.app';
+        const appUrl = process.env.APP_URL || 'http://localhost:5173';
         const resetLink = `${appUrl}/reset-password?token=${token}`;
 
         await sendPasswordResetEmail(email, user.name, resetLink);
