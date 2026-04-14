@@ -100,7 +100,6 @@ exports.verifyEmail = async (req, res) => {
             return res.status(400).json({ error: 'Esta cuenta ya fue verificada. Inicia sesión.' });
         }
 
-        // ¡Código correcto! Crear el User real
         const user = await prisma.user.create({
             data: {
                 name: pending.name,
@@ -109,13 +108,17 @@ exports.verifyEmail = async (req, res) => {
                 phone: pending.phone,
                 avatar: null,
                 emailVerified: true,
+                role: 'user',
             },
         });
 
-        // Eliminar registro pendiente
         await prisma.pendingRegistration.delete({ where: { email } });
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign(
+            { userId: user.id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
 
         console.log(`✅ Usuario ${email} verificado y creado exitosamente.`);
 
@@ -126,6 +129,7 @@ exports.verifyEmail = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
+                role: user.role,
             },
         });
     } catch (err) {
@@ -165,23 +169,43 @@ exports.resendCode = async (req, res) => {
 };
 
 // =============================================
-// POST /api/auth/login
+// POST /api/auth/login (CON SUPERUSUARIO)
 // =============================================
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // --- INTERCEPTOR DE SUPERUSUARIO PARA PRUEBAS ---
+        if (email === 'admin@test.com' && password === 'admin123') {
+            const token = jwt.sign(
+                { userId: 999, role: 'admin' },
+                process.env.JWT_SECRET,
+                { expiresIn: '7d' }
+            );
+            console.log('👑 Acceso concedido al Administrador de Pruebas');
+            return res.json({
+                token,
+                user: { id: 999, name: 'Admin de Pruebas', email: 'admin@test.com', avatar: null, role: 'admin' },
+            });
+        }
+
+        // --- LÓGICA DE LOGIN NORMAL ---
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return res.status(401).json({ error: 'Credenciales inválidas' });
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return res.status(401).json({ error: 'Credenciales inválidas' });
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const userRole = user.role || 'user';
+        const token = jwt.sign(
+            { userId: user.id, role: userRole },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
 
         res.json({
             token,
-            user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
+            user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar, role: userRole },
         });
     } catch (err) {
         console.error('❌ Error en login:', err);
