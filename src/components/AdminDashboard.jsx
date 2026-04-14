@@ -57,14 +57,14 @@ const AdminDashboard = () => {
 
   if (error && !usingMockData) return (
     <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded shadow-sm">
-      <p className="font-bold">⚠️ Error de sincronización</p>
+      <p className="font-bold">\u26A0\uFE0F Error de sincronizaci\u00F3n</p>
       <p className="text-sm">{error}</p>
       <div className="flex gap-3 mt-3">
         <button 
           onClick={() => window.location.reload()} 
           className="text-xs underline font-bold uppercase"
         >
-          Reintentar conexión
+          Reintentar conexi\u00F3n
         </button>
         <button 
           onClick={() => {
@@ -73,19 +73,19 @@ const AdminDashboard = () => {
           }} 
           className="text-xs underline font-bold uppercase text-red-600"
         >
-          Cerrar sesión
+          Cerrar sesi\u00F3n
         </button>
       </div>
     </div>
   );
 
   const cards = [
-    { title: 'Total Usuarios', value: stats?.totalUsers, icon: '👥', color: 'bg-blue-500' },
-    { title: 'Total Pedidos', value: stats?.totalOrders, icon: '📦', color: 'bg-green-500' },
-    { title: 'Pedidos Pendientes', value: stats?.pendingOrders, icon: '⏳', color: 'bg-yellow-500' },
-    { title: 'Ingresos Totales', value: `$${stats?.totalRevenue?.toFixed(2) || 0}`, icon: '💰', color: 'bg-emerald-600' },
-    { title: 'Total Plantas', value: stats?.totalPlants, icon: '🌿', color: 'bg-lime-600' },
-    { title: 'Total Posts', value: stats?.totalPosts, icon: '📝', color: 'bg-purple-500' },
+    { title: 'Total Usuarios', value: stats?.totalUsers, icon: '\uD83D\uDC65', color: 'bg-blue-500' },
+    { title: 'Total Pedidos', value: stats?.totalOrders, icon: '\uD83D\uDCE6', color: 'bg-green-500' },
+    { title: 'Pedidos Pendientes', value: stats?.pendingOrders, icon: '\u23F3', color: 'bg-yellow-500' },
+    { title: 'Ingresos Totales', value: `$${stats?.totalRevenue?.toFixed(2) || 0}`, icon: '\uD83D\uDCB0', color: 'bg-emerald-600' },
+    { title: 'Total Plantas', value: stats?.totalPlants, icon: '\uD83C\uDF3F', color: 'bg-lime-600' },
+    { title: 'Total Posts', value: stats?.totalPosts, icon: '\uD83D\uDCDD', color: 'bg-purple-500' },
   ];
 
   return (
@@ -93,13 +93,13 @@ const AdminDashboard = () => {
       {/* Aviso de datos de demostración */}
       {usingMockData && (
         <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 rounded shadow-sm">
-          <p className="font-bold">📊 Datos de demostración</p>
+          <p className="font-bold">\uD83D\uDCCA Datos de demostraci\u00F3n</p>
           <p className="text-sm">No se pudo conectar con el servidor. Mostrando datos de ejemplo.</p>
           <button 
             onClick={() => window.location.reload()} 
             className="mt-2 text-xs underline font-bold"
           >
-            Reintentar conexión
+            Reintentar conexi\u00F3n
           </button>
         </div>
       )}
@@ -108,32 +108,32 @@ const AdminDashboard = () => {
       <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
         <div className="flex items-start gap-4">
           <div className="bg-green-100 rounded-full p-3">
-            <span className="text-2xl">🌿</span>
+            <span className="text-2xl">\uD83C\uDF3F</span>
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-800">
-              👋 ¡Hola, {adminName}!
+              \uD83D\uDC4B \u00A1Hola, {adminName}!
             </h1>
             <p className="text-gray-600 mt-1 max-w-2xl">
               Bienvenido al panel de control de <span className="font-semibold text-green-700">Tu Selva Urbana</span>. 
-              Desde aquí puedes gestionar el catálogo de plantas, revisar los pedidos de los clientes, 
+              Desde aqu\u00ED puedes gestionar el cat\u00E1logo de plantas, revisar los pedidos de los clientes, 
               administrar los usuarios de la comunidad y dar de alta nuevas especies en el inventario.
             </p>
             <div className="flex flex-wrap gap-4 mt-4">
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>📦</span>
+                <span>\uD83D\uDCE6</span>
                 <span>Gestiona pedidos</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>🌿</span>
+                <span>\uD83C\uDF3F</span>
                 <span>Administra plantas</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>👥</span>
+                <span>\uD83D\uDC65</span>
                 <span>Controla usuarios</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>📝</span>
+                <span>\uD83D\uDCDD</span>
                 <span>Modera publicaciones</span>
               </div>
             </div>
@@ -161,8 +161,8 @@ const AdminDashboard = () => {
       {/* Mensaje de estado */}
       <div className="text-right">
         <p className="text-xs text-gray-400">
-          {usingMockData ? '📊 Datos de demostración - ' : ''}
-          Última actualización: {new Date().toLocaleString()}
+          {usingMockData ? '\uD83D\uDCCA Datos de demostraci\u00F3n - ' : ''}
+          \u00DAltima actualizaci\u00F3n: {new Date().toLocaleString()}
         </p>
       </div>
     </div>
