@@ -16,6 +16,7 @@ router.put('/orders/:id/status', ctrl.updateOrderStatus);
 
 // --- Gestión de Usuarios ---
 router.get('/users', ctrl.getAllUsers);
+router.post('/users/create', ctrl.createUserByAdmin);  // ✅ NUEVO: Crear usuario por admin
 router.put('/users/:id/role', ctrl.updateUserRole);
 router.delete('/users/:id', ctrl.deleteUser);
 

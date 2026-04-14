@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
 
 // ==========================================
 // GESTIÓN DE PEDIDOS (ORDERS)
@@ -85,6 +86,56 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+// ✅ NUEVO: Crear usuario directamente por admin (sin verificación de email)
+const createUserByAdmin = async (req, res) => {
+    const { name, email, password, phone, role, emailVerified } = req.body;
+    
+    try {
+        // Validar campos obligatorios
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'Nombre, email y contraseña son obligatorios' });
+        }
+        
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+        }
+        
+        // Encriptar contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const newUser = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                phone: phone || null,
+                role: role || 'user',
+                emailVerified: emailVerified !== undefined ? emailVerified : true
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                phone: true,
+                createdAt: true
+            }
+        });
+        
+        res.status(201).json({ 
+            success: true, 
+            message: 'Usuario creado exitosamente',
+            user: newUser 
+        });
+    } catch (error) {
+        console.error('Error al crear usuario por admin:', error);
+        if (error.code === 'P2002') {
+            return res.status(400).json({ error: 'El email ya está registrado' });
+        }
+        res.status(500).json({ error: 'Error al crear el usuario' });
+    }
+};
+
 // Eliminar un usuario por ID
 const deleteUser = async (req, res) => {
     const { id } = req.params;
@@ -129,7 +180,7 @@ const updateUserRole = async (req, res) => {
 const createPlant = async (req, res) => {
     const { 
         name, slug, price, careLevel, light, petSafe, imageUrl, tag,
-        modelUrl, careWater, careLight, careHumidity  // Campos opcionales agregados
+        modelUrl, careWater, careLight, careHumidity
     } = req.body;
 
     // Validar campos obligatorios
@@ -254,6 +305,7 @@ module.exports = {
     getAllOrders,
     updateOrderStatus,
     getAllUsers,
+    createUserByAdmin,  // ✅ NUEVO: Exportado
     deleteUser,
     updateUserRole,
     createPlant,
