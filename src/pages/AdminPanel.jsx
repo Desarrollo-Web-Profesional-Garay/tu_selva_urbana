@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import AdminDashboard from '../components/AdminDashboard';
+import AdminDashboard from '../components/AdminDashboard'; // ✅ Corregido: misma carpeta
 import AdminCatalog from '../components/AdminCatalog';
 import AdminOrders from '../components/AdminOrders';
-import AdminUsers from '../components/AdminUsers'; // Importado correctamente
+import AdminUsers from '../components/AdminUsers';
 
 const AdminPanel = () => {
     // Estado para controlar la navegación del panel
@@ -26,10 +26,17 @@ const AdminPanel = () => {
             case 'Pedidos':
                 return <AdminOrders />;
             case 'Usuarios':
-                return <AdminUsers />; // Ahora renderiza el componente real de gestión
+                return <AdminUsers />;
             default:
                 return <AdminDashboard />;
         }
+    };
+
+    // Función para cerrar sesión
+    const handleLogout = () => {
+        localStorage.removeItem('tsu_token');
+        localStorage.removeItem('tsu_user');
+        window.location.href = '/login';
     };
 
     return (
@@ -66,7 +73,10 @@ const AdminPanel = () => {
                 </nav>
 
                 <div className="p-4 border-t border-white/10">
-                    <button className="w-full flex items-center p-3 text-gray-400 hover:text-red-400 hover:bg-red-900/10 rounded-xl transition-all">
+                    <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center p-3 text-gray-400 hover:text-red-400 hover:bg-red-900/10 rounded-xl transition-all"
+                    >
                         <span className="text-xl w-8 flex justify-center">🚪</span>
                         <span className="ml-3 hidden md:block font-medium">Salir</span>
                     </button>

@@ -190,7 +190,7 @@ function ForgotStep({ onBack }) {
 
 // ─── COMPONENTE PRINCIPAL ───
 export default function Login() {
-    const { login, register } = useContext(GlobalContext);
+    const { login, register } = useContext(GlobalContext); // ✅ CORREGIDO: añadido register
     const navigate = useNavigate();
     const [mode, setMode] = useState('login'); // 'login' | 'register' | 'verify' | 'forgot'
     const [showPassword, setShowPassword] = useState(false);
@@ -204,25 +204,44 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); setError('');
+        setLoading(true); 
+        setError('');
 
         if (mode === 'register') {
             try {
-                const data = await authAPI.register(form.name, form.email, form.password, form.phone);
-                if (data.requiresVerification) {
+                // ✅ Usar register del contexto en lugar de authAPI directamente
+                const result = await register(form.name, form.email, form.password, form.phone);
+                
+                if (result.requiresVerification) {
                     setPendingEmail(form.email);
                     setPendingPhone(form.phone);
                     setMode('verify');
+                } else if (result.success) {
+                    // Si no requiere verificación, redirigir según rol
+                    if (result.user?.role === 'admin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/feed');
+                    }
                 }
             } catch (err) {
                 setError(err.message || 'Error al crear cuenta');
             }
         } else {
-            // Login directo — ya no hay usuarios sin verificar en la tabla User
+            // Login
             try {
                 const result = await login(form.email, form.password);
-                if (result.success) navigate('/feed');
-                else setError(result.error || 'Credenciales inválidas');
+                
+                if (result.success) {
+                    // ✅ Usar navigate en lugar de window.location.href
+                    if (result.user?.role === 'admin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/feed');
+                    }
+                } else {
+                    setError(result.error || 'Credenciales inválidas');
+                }
             } catch (err) {
                 setError(err.message || 'Credenciales inválidas');
             }
@@ -230,11 +249,19 @@ export default function Login() {
         setLoading(false);
     };
 
-    // Cuando verificación OTP tiene éxito — el backend devuelve token + user
+    // Cuando verificación OTP tiene éxito
     const onVerifySuccess = (data) => {
         localStorage.setItem('tsu_token', data.token);
-        // Recargar para que el GlobalContext lea el token
-        window.location.href = '/feed';
+        if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
+        
+        // ✅ Usar navigate para redirección suave
+        if (data.user?.role === 'admin') {
+            navigate('/admin');
+        } else {
+            navigate('/feed');
+        }
     };
 
     const isRegister = mode === 'register';

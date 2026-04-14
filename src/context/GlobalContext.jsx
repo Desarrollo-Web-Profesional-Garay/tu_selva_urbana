@@ -8,18 +8,21 @@ export const GlobalProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem('tsu_user');
         const token = localStorage.getItem('tsu_token');
-        // Si hay usuario guardado pero NO hay token (sesión vieja del mock), limpiar
+        // Si hay usuario guardado pero NO hay token (sesión vieja o expirada), limpiar
         if (saved && !token) {
             localStorage.removeItem('tsu_user');
             return null;
         }
         return saved ? JSON.parse(saved) : null;
     });
+
     const isAuthenticated = !!user;
 
+    // Persistencia de sesión
     useEffect(() => {
-        if (user) localStorage.setItem('tsu_user', JSON.stringify(user));
-        else {
+        if (user) {
+            localStorage.setItem('tsu_user', JSON.stringify(user));
+        } else {
             localStorage.removeItem('tsu_user');
             localStorage.removeItem('tsu_token');
         }
@@ -28,33 +31,55 @@ export const GlobalProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const data = await authAPI.login(email, password);
-            localStorage.setItem('tsu_token', data.token);
-            setUser(data.user);
-            return { success: true };
+            if (data.token) {
+                localStorage.setItem('tsu_token', data.token);
+                setUser(data.user);
+                // Retornamos el objeto completo para que Login.jsx decida la redirección
+                return { success: true, user: data.user };
+            }
+            return { success: false, error: 'Respuesta de servidor incompleta' };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err.message || 'Error al iniciar sesión' };
         }
     };
 
     const register = async (name, email, password, phone) => {
         try {
             const data = await authAPI.register(name, email, password, phone);
-            // Si el backend pide verificación, no logueamos aún
+            // Si el backend pide verificación OTP
             if (data.requiresVerification) {
                 return { success: true, requiresVerification: true, email };
             }
-            // En caso de que no requiera verificación (legado)
+            // Login automático si el backend no requiere OTP
             if (data.token) {
                 localStorage.setItem('tsu_token', data.token);
                 setUser(data.user);
             }
-            return { success: true };
+            return { success: true, user: data.user };
         } catch (err) {
             return { success: false, error: err.message };
         }
     };
 
-    const logout = () => setUser(null);
+    const logout = () => {
+        setUser(null);
+        // Limpiamos todo el rastro de sesión (pero NO localStorage.clear() completo)
+        localStorage.removeItem('tsu_user');
+        localStorage.removeItem('tsu_token');
+        // No limpiamos quiz_answers ni recommendations para mantener experiencia
+        window.location.href = '/login';
+    };
+
+    const updateProfile = async (data) => {
+        try {
+            const updatedUser = await usersAPI.updateMe(data);
+            setUser(updatedUser);
+            return { success: true };
+        } catch (err) {
+            console.error('Error actualizando perfil:', err);
+            return { success: false, error: err.message };
+        }
+    };
 
     // ========== PLANTS (catálogo) ==========
     const [plantDatabase, setPlantDatabase] = useState([]);
@@ -75,6 +100,7 @@ export const GlobalProvider = ({ children }) => {
         const saved = localStorage.getItem('tsu_quiz_answers');
         return saved ? JSON.parse(saved) : null;
     });
+    
     const [recommendations, setRecommendations] = useState(() => {
         const saved = localStorage.getItem('tsu_recommendations');
         return saved ? JSON.parse(saved) : [];
@@ -89,6 +115,7 @@ export const GlobalProvider = ({ children }) => {
             localStorage.setItem('tsu_recommendations', JSON.stringify(data));
         } catch (err) {
             console.error('Error en quiz:', err);
+            // ✅ FALBACK: usar plantDatabase como respaldo (del original)
             const fallback = plantDatabase.slice(0, 3);
             setRecommendations(fallback);
             localStorage.setItem('tsu_quiz_answers', JSON.stringify(answers));
@@ -146,27 +173,14 @@ export const GlobalProvider = ({ children }) => {
         }
     };
 
-    const updateProfile = async (data) => {
-        try {
-            const updatedUser = await usersAPI.updateMe(data);
-            setUser(updatedUser);
-            return { success: true };
-        } catch (err) {
-            console.error('Error actualizando perfil:', err);
-            return { success: false, error: err.message };
-        }
-    };
-
-    // ========== CARRITO ==========
-    // Normalizar un plant para que siempre tenga price como número
+    // ========== CARRITO (con validación robusta) ==========
     const normalizePlant = (plant) => ({
         ...plant,
         price: parseFloat(plant?.price) || 0,
     });
 
-    // Validar que un item del carrito tenga estructura correcta
     const isValidItem = (item) =>
-        item &&
+        item && 
         typeof item === 'object' &&
         item.plant &&
         typeof item.plant === 'object' &&
@@ -179,14 +193,21 @@ export const GlobalProvider = ({ children }) => {
             const saved = localStorage.getItem('tsu_cart');
             if (!saved) return [];
             const parsed = JSON.parse(saved);
-            if (!Array.isArray(parsed)) { localStorage.removeItem('tsu_cart'); return []; }
+            if (!Array.isArray(parsed)) {
+                localStorage.removeItem('tsu_cart');
+                return [];
+            }
             // Normalizar y limpiar desde el inicio
             const valid = parsed
                 .filter(isValidItem)
                 .map(item => ({ ...item, plant: normalizePlant(item.plant) }));
             return valid;
-        } catch { localStorage.removeItem('tsu_cart'); return []; }
+        } catch { 
+            localStorage.removeItem('tsu_cart'); 
+            return []; 
+        }
     });
+    
     const [isCartOpen, setIsCartOpen] = useState(false);
 
     useEffect(() => {
@@ -215,7 +236,10 @@ export const GlobalProvider = ({ children }) => {
     };
 
     const updateQty = (plantId, qty) => {
-        if (qty <= 0) { removeFromCart(plantId); return; }
+        if (qty <= 0) { 
+            removeFromCart(plantId); 
+            return; 
+        }
         setCart(prev => prev.map(item =>
             item?.plant?.id === plantId ? { ...item, quantity: qty } : item
         ).filter(isValidItem));
@@ -226,19 +250,47 @@ export const GlobalProvider = ({ children }) => {
     const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const cartTotal = cart.reduce((sum, item) => sum + (parseFloat(item.plant?.price) || 0) * (item.quantity || 1), 0);
 
-
     return (
         <GlobalContext.Provider value={{
-            user, isAuthenticated, login, register, logout, updateProfile,
-            posts, likePost, fetchPosts,
-            myPlants, adoptPlant,
-            recommendations, quizAnswers, handleDiagnostic,
-            plantDatabase,
-            cart, addToCart, removeFromCart, updateQty, clearCart,
-            cartCount, cartTotal, isCartOpen, setIsCartOpen,
+            // Auth
+            user, 
+            isAuthenticated, 
+            login, 
+            register, 
+            logout, 
+            updateProfile,
+            
+            // Posts
+            posts, 
+            likePost, 
+            fetchPosts,
+            
+            // Mis plantas
+            myPlants, 
+            adoptPlant, 
+            fetchMyPlants,
+            
+            // Quiz / Diagnóstico
+            recommendations, 
+            quizAnswers, 
+            handleDiagnostic,
+            
+            // Catálogo
+            plantDatabase, 
+            fetchPlants,
+            
+            // Carrito
+            cart, 
+            addToCart, 
+            removeFromCart, 
+            updateQty, 
+            clearCart,
+            cartCount, 
+            cartTotal, 
+            isCartOpen, 
+            setIsCartOpen,
         }}>
             {children}
         </GlobalContext.Provider>
     );
 };
-
