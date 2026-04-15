@@ -27,7 +27,6 @@ import PlantDetail from './pages/PlantDetail';
 
 // Páginas de Administración
 import AdminPanel from './pages/AdminPanel';
-import UsersTable from './pages/UsersTable';
 
 // Wrapper que protege rutas internas
 function ProtectedRoute({ children }) {
@@ -49,7 +48,6 @@ function App() {
 
                 {/* 2. RUTAS DE ADMINISTRACIÓN */}
                 <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-                <Route path="/admin/usuarios" element={<AdminRoute><UsersTable /></AdminRoute>} />
 
                 {/* 3. Rutas protegidas con layout principal */}
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
