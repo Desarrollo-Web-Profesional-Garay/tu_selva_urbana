@@ -16,6 +16,7 @@
 - [Primeros Pasos](#primeros-pasos)
 - [Scripts Disponibles](#scripts-disponibles)
 - [Estructura del Proyecto](#estructura-del-proyecto)
+- [Equipo de Desarrollo](#equipo-de-desarrollo)
 - [Contribuir](#contribuir)
 - [Licencia](#licencia)
 
@@ -218,6 +219,85 @@ tu-selva-urbana-react/
    git push origin dev
    ```
 5. Abre un Pull Request apuntando a la rama `main` del repositorio original.
+
+---
+
+## Team Members
+
+<br>
+
+<div align="center">
+
+<table>
+  <thead>
+    <tr>
+      <th align="center">👤 Integrante</th>
+      <th align="center">🎓 Rol en el Equipo</th>
+      <th align="center">🔗 GitHub</th>
+      <th align="center">🛠️ Área de Contribución</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <b>Ángel</b>
+      </td>
+      <td align="center">Desarrollador Frontend</td>
+      <td align="center">
+        <a href="https://github.com/Desarrollo-Web-Profesional-Garay">
+          <img src="https://img.shields.io/badge/GitHub-Angel-181717?style=flat&logo=github&logoColor=white" alt="GitHub Angel"/>
+        </a>
+      </td>
+      <td align="center">Interfaz de usuario, componentes React, rama <code>Front-Angel</code></td>
+    </tr>
+    <tr>
+      <td align="center">
+        <b>César</b>
+      </td>
+      <td align="center">Desarrollador Full Stack</td>
+      <td align="center">
+        <a href="https://github.com/Desarrollo-Web-Profesional-Garay">
+          <img src="https://img.shields.io/badge/GitHub-Cesar-181717?style=flat&logo=github&logoColor=white" alt="GitHub Cesar"/>
+        </a>
+      </td>
+      <td align="center">Integración 3D, animaciones, flujo de pagos, documentación</td>
+    </tr>
+    <tr>
+      <td align="center">
+        <b>Equipo Backend</b>
+      </td>
+      <td align="center">Desarrollador Backend</td>
+      <td align="center">
+        <a href="https://github.com/Desarrollo-Web-Profesional-Garay">
+          <img src="https://img.shields.io/badge/GitHub-Backend-181717?style=flat&logo=github&logoColor=white" alt="GitHub Backend"/>
+        </a>
+      </td>
+      <td align="center">API REST, base de datos, autenticación, rama <code>backend</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+<br>
+
+<div align="center">
+
+### Tecnologías dominadas por el equipo
+
+<br>
+
+<img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
+<img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
+<img src="https://img.shields.io/badge/TailwindCSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind"/>
+<img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js"/>
+<img src="https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="PayPal"/>
+<img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git"/>
+<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+
+</div>
+
+<br>
 
 ---
 

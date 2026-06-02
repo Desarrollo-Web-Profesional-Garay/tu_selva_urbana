@@ -86,7 +86,6 @@ export const plantsAPI = {
     quiz: (answers) => request('/plants/quiz', { method: 'POST', body: JSON.stringify(answers) }),
 };
 
-// ========== POSTS ==========
 export const postsAPI = {
     getAll: () => request('/posts'),
     create: (data) => request('/posts', { method: 'POST', body: JSON.stringify(data) }),
@@ -95,14 +94,12 @@ export const postsAPI = {
     addComment: (id, text) => request(`/posts/${id}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
 };
 
-// ========== ORDERS ==========
 export const ordersAPI = {
     create: (items, address, paymentMethod) =>
         request('/orders', { method: 'POST', body: JSON.stringify({ items, address, paymentMethod }) }),
     getAll: () => request('/orders'),
 };
 
-// ========== USERS ==========
 export const usersAPI = {
     getMe: () => request('/users/me'),
     updateMe: (data) => request('/users/me', { method: 'PUT', body: JSON.stringify(data) }),
@@ -110,8 +107,7 @@ export const usersAPI = {
     adoptPlant: (plantId) => request('/users/me/plants', { method: 'POST', body: JSON.stringify({ plantId }) }),
 };
 
-// ========== DASHBOARD / ADMIN ==========
-export const adminAPI = {
+ export const adminAPI = {
     getStats: () => request('/admin/stats'),
     getOrders: () => request('/admin/orders'),
     updateOrderStatus: (orderId, status) => request(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
