@@ -240,15 +240,15 @@ tu-selva-urbana-react/
   <tbody>
     <tr>
       <td align="center">
-        <b>Ángel</b>
+        <b>ZahirAndres</b>
       </td>
       <td align="center">Desarrollador Frontend</td>
       <td align="center">
         <a href="https://github.com/Desarrollo-Web-Profesional-Garay">
-          <img src="https://img.shields.io/badge/GitHub-Angel-181717?style=flat&logo=github&logoColor=white" alt="GitHub Angel"/>
+          <img src="https://img.shields.io/badge/GitHub-ZahirAndres-181717?style=flat&logo=github&logoColor=white" alt="GitHub ZahirAndres"/>
         </a>
       </td>
-      <td align="center">Interfaz de usuario, componentes React, rama <code>Front-Angel</code></td>
+      <td align="center">Interfaz de usuario, componentes React, rama <code>Front-ZahirAndres</code></td>
     </tr>
     <tr>
       <td align="center">
