@@ -8,8 +8,8 @@
 
 ## Tabla de Contenidos
 
-- [Fortalezas del Proyecto](#fortalezas-del-proyecto)
-- [Oportunidades de Mejora](#oportunidades-de-mejora)
+- [Project Strengths](#project-strengths)
+- [Improvement Opportunities](#improvement-opportunities)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
 - [Diagrama de Arquitectura](#diagrama-de-arquitectura)
 - [Requerimientos Funcionales](#requerimientos-funcionales)
@@ -21,7 +21,7 @@
 
 ---
 
-## Fortalezas del Proyecto
+## Project Strengths
 
 1. **Interfaz de Usuario Rica y Moderna** — La aplicación aprovecha Framer Motion y GSAP para animaciones fluidas, TailwindCSS para un sistema de diseño consistente y Lucide React para una iconografía limpia, lo que resulta en una experiencia de usuario pulida y de alto nivel.
 
@@ -39,7 +39,7 @@
 
 ---
 
-## Oportunidades de Mejora
+## Improvement Opportunities
 
 1. **Cobertura de Pruebas Automatizadas** — El proyecto actualmente carece de pruebas unitarias, de integración y de extremo a extremo. Introducir Vitest (para unitarias/integración) y Playwright o Cypress (para E2E) mejoraría considerablemente la confiabilidad y la seguridad durante futuros refactors.
 
