@@ -369,6 +369,25 @@ Pregunta del usuario: "¿Cada cuánto debo regar mi Monstera?
 }
 ```
 
+### 1.8 Evidencias de Funcionamiento (Capturas de Pantalla)
+
+En este apartado se adjuntan las capturas de pantalla que demuestran el funcionamiento y consumo real de la API de Google Gemini en la aplicación:
+
+#### A) Prueba de conexión exitosa en consola (test_gemini.js)
+*(Muestra el script de prueba validando la comunicación directa con el modelo `gemini-2.5-flash`)*
+
+![Prueba de conexión exitosa en consola](./evidencias/evidencia_consola.png)
+
+#### B) Consumo de la API desde un cliente REST (Postman / Insomnia / PowerShell)
+*(Muestra la petición HTTP POST enviada al backend en `http://localhost:3001/api/chat` y la respuesta JSON retornada con la respuesta del chatbot)*
+
+![Prueba de endpoint REST](./evidencias/evidencia_rest.png)
+
+#### C) Chatbot Botánico integrado en la interfaz de usuario (Frontend)
+*(Muestra al asistente virtual respondiendo preguntas sobre plantas y navegación directamente en la interfaz gráfica del sitio)*
+
+![Chatbot integrado en el frontend](./evidencias/evidencia_frontend.png)
+
 ---
 
 ## 2. Otros Servicios de Terceros Consumidos
