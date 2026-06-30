@@ -376,17 +376,16 @@ En este apartado se adjuntan las capturas de pantalla que demuestran el funciona
 #### A) Prueba de conexión exitosa en consola (test_gemini.js)
 *(Muestra el script de prueba validando la comunicación directa con el modelo `gemini-2.5-flash`)*
 
-![Prueba de conexión exitosa en consola](./evidencias/evidencia_consola.png)
+![Prueba de conexión exitosa en consola]
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/05592f6d-ff29-45aa-8009-cedbbae69c20" />
 
-#### B) Consumo de la API desde un cliente REST (Postman / Insomnia / PowerShell)
-*(Muestra la petición HTTP POST enviada al backend en `http://localhost:3001/api/chat` y la respuesta JSON retornada con la respuesta del chatbot)*
 
-![Prueba de endpoint REST](./evidencias/evidencia_rest.png)
-
-#### C) Chatbot Botánico integrado en la interfaz de usuario (Frontend)
+#### B) Chatbot Botánico integrado en la interfaz de usuario (Frontend)
 *(Muestra al asistente virtual respondiendo preguntas sobre plantas y navegación directamente en la interfaz gráfica del sitio)*
 
-![Chatbot integrado en el frontend](./evidencias/evidencia_frontend.png)
+![Chatbot integrado en el frontend]
+<img width="1280" height="612" alt="image" src="https://github.com/user-attachments/assets/4fefbd78-18c9-4c4e-970d-68543a5f5973" />
+
 
 ---
 
