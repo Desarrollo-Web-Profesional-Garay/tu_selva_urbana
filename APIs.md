@@ -268,21 +268,21 @@ export default function Chatbot({ plantContext = null }) {
 ```mermaid
 sequenceDiagram
     participant U as Usuario
-    participant F as Frontend React<br>(Chatbot.jsx)
-    participant S as Servicio API<br>(api.js)
-    participant B as Backend Express<br>(chat.controller.js)
-    participant G as Google Gemini API<br>(gemini-2.5-flash)
+    participant F as Frontend React - Chatbot.jsx
+    participant S as Servicio API - api.js
+    participant B as Backend Express - chat.controller.js
+    participant G as Google Gemini API - gemini-2.5-flash
 
     U->>F: Escribe mensaje en el chat
     F->>F: Agrega mensaje a la UI
     F->>F: Muestra indicador de carga
-    F->>S: chatAPI.sendMessage(message, plantContext)
-    S->>B: POST /api/chat<br>{message, context}
+    F->>S: chatAPI.sendMessage
+    S->>B: POST /api/chat
     B->>B: Valida mensaje y API Key
-    B->>B: Construye prompt:<br>SYSTEM_PROMPT + mensaje + contexto
-    B->>G: model.generateContent(prompt)
-    G-->>B: result.response.text()
-    B-->>S: { reply: "respuesta de Gemini" }
+    B->>B: Construye prompt con SYSTEM_PROMPT
+    B->>G: model.generateContent
+    G-->>B: result.response.text
+    B-->>S: reply - respuesta de Gemini
     S-->>F: Respuesta JSON
     F->>F: Agrega respuesta del bot a la UI
     F->>F: Oculta indicador de carga
@@ -293,33 +293,33 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph "Frontend — React SPA"
-        A[Chatbot.jsx<br>Componente flotante]
-        B[api.js<br>chatAPI.sendMessage]
+    subgraph Frontend
+        A["Chatbot.jsx - Componente flotante"]
+        B["api.js - chatAPI.sendMessage"]
     end
 
-    subgraph "Backend — Express.js"
-        C[chat.routes.js<br>POST /api/chat]
-        D[chat.controller.js<br>sendMessage]
-        E[System Prompt<br>65 líneas de contexto]
+    subgraph Backend
+        C["chat.routes.js - POST /api/chat"]
+        D["chat.controller.js - sendMessage"]
+        E["System Prompt - 65 lineas de contexto"]
     end
 
-    subgraph "Google Cloud"
-        F[Google Generative AI<br>Gemini 2.5 Flash]
+    subgraph Google_Cloud
+        F["Google Generative AI - Gemini 2.5 Flash"]
     end
 
-    subgraph "Configuración"
-        G[.env<br>GEMINI_API_KEY]
-        H[package.json<br>@google/generative-ai ^0.24.1]
+    subgraph Configuracion
+        G[".env - GEMINI_API_KEY"]
+        H["package.json - generative-ai v0.24.1"]
     end
 
-    A -->|input del usuario + plantContext| B
+    A -->|input del usuario| B
     B -->|POST /api/chat| C
     C --> D
     D -->|Concatena| E
     E -->|prompt completo| F
     F -->|respuesta generada| D
-    D -->|{ reply }| B
+    D -->|reply| B
     B -->|respuesta| A
 
     G -.->|apiKey| D
@@ -391,18 +391,18 @@ Además de Google Gemini, el proyecto utiliza los siguientes servicios externos 
 
 ```mermaid
 graph LR
-    subgraph "Tu Selva Urbana"
-        APP[Aplicación Web<br>React + Express]
+    subgraph Tu_Selva_Urbana
+        APP["Aplicacion Web - React + Express"]
     end
 
-    APP -->|IA Chatbot| GEMINI[Google Gemini 2.5 Flash<br>Servicio principal documentado]
-    APP -->|Pagos| PAYPAL[PayPal SDK]
-    APP -->|Emails OTP| BREVO[Brevo SMTP]
-    APP -->|Avatares| UIAV[UI Avatars]
-    APP -->|Fotos HD| UNSPLASH[Unsplash]
-    APP -->|Avatares mock| PRAVATAR[Pravatar]
-    APP -->|Modelos 3D| MODELS[Model Viewer CDN]
-    APP -->|Fallback imgs| PLACEHOLDER[Via Placeholder]
+    APP -->|IA Chatbot| GEMINI["Google Gemini 2.5 Flash"]
+    APP -->|Pagos| PAYPAL["PayPal SDK"]
+    APP -->|Emails OTP| BREVO["Brevo SMTP"]
+    APP -->|Avatares| UIAV["UI Avatars"]
+    APP -->|Fotos HD| UNSPLASH["Unsplash"]
+    APP -->|Avatares mock| PRAVATAR["Pravatar"]
+    APP -->|Modelos 3D| MODELS["Model Viewer CDN"]
+    APP -->|Fallback imgs| PLACEHOLDER["Via Placeholder"]
 
     style GEMINI fill:#4285F4,stroke:#1a73e8,color:#fff,stroke-width:3px
     style PAYPAL fill:#003087,stroke:#002060,color:#fff
